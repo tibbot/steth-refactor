@@ -1,0 +1,37 @@
+# ignore visual studio/vs code settings
+.vs/
+.vscode/
+*.suo
+*.user
+*.dbmdl
+*.VC.db
+
+# ignore build artifacts
+bin/
+obj/
+*.exe
+*.dll
+*.pbd
+*.cache
+*.log
+*.sqlite
+*.sdf
+*.ipch
+
+# ingore NuGett Packages
+packages/
+*.nupkg
+project.lock.json
+project.assets.json
+
+# ingnore publish output
+publish/
+wwwroot/node_modules/
+wwwroot/lib/
+wwwroot/dist/
+
+# ignore submodule data
+.git/modules/
+
+# ignore RIP
+rip/

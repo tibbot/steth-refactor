@@ -1,0 +1,44 @@
+﻿:root {
+    --app-image: url("/img/scp.png");
+}
+
+.app {
+    background-image: var(--app-image);
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.wrap {
+    display: grid;
+    grid-template-rows: 90px 1fr 42px;
+    grid-template-columns: 2fr 1fr 0px;
+    height: 100vh;
+}
+
+/* hide controls by default */
+.nps-action {
+    display: none !important;
+}
+
+/* show controls only when table exists */
+[data-table].has-table + .nps-action {
+    display: block;
+}
+
+.data-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.refine-fieldset {
+    grid-column: 1 / -1;
+}
+.refine-search {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+    margin: 1rem;
+    width: 100%;
+}

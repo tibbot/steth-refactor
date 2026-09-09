@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "target": "ES2020",
+    "baseUrl": ".",
+    "paths": {
+      "http://localhost/core-service": [ "Types/core-service.d.ts" ]
+    },
+    "typeRoots": [
+      "Types",
+      "node_modules/@types"
+    ]
+  },
+  "include": [
+    "wwwroot/js/**/*",
+    "Types/**/*.d.ts"
+  ],
+  "exclude": [
+    "wwwroot/js/lib/**",
+    "wwwroot/js/vendor/**",
+    "node_modules"
+  ]
+}

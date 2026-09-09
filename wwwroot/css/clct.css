@@ -1,0 +1,58 @@
+﻿.tabs {
+    display: flex;
+}
+
+.tab {
+    width: 20rem;
+    padding: 10px 15px;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    background-color: var(--default-background-color);
+    cursor: pointer;
+    margin-right: 5px;
+    border-radius: var(--default-border-radius) var(--default-border-radius) 0 0;
+    transition: background-color 0.3s;
+    margin: 0 2px -1px 2px;
+}
+
+    .tab.active {
+        background-color: var(--primary-color);
+        color: var(--secondary-color);
+        border-bottom: 1px solid transparent;
+    }
+
+    .tab:hover {
+        background-color: var(--secondary-color);
+    }
+
+    .tab.active:hover {
+        background-color: var(--primary-color);
+    }
+
+.pnls {
+    border: 1px solid var(--primary-color);
+    padding: 20px;
+    border-radius: 0 0 var(--default-border-radius) var(--default-border-radius);
+    width: 100%;
+    min-height: 300px;
+    max-height: 600px;
+    overflow: auto;
+}
+
+.pnl {
+    display: none;
+}
+
+    .pnl.active {
+        display: block;
+    }
+
+.dbs [data-label]:not(:empty)::before {
+    content: attr(data-label);
+    display: block; /* <— shifts it above the value */
+    font-size: 0.8rem;
+    font-family: var(--form-font);
+    color: var(--primary-color);
+    user-select: none;
+    margin-bottom: 0.1rem; /* slight spacing above value */
+}

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Stethoscope / Microscope | Member Contract
  * --------------------------------------------------

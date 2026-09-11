@@ -40,6 +40,7 @@ export class Incident {
             { domain: 'MEMBER', label: 'Member', peekType: 'member', searchProc: 'scp.get_member_search', searchSnipId: 'msx' },
             { domain: 'PROVIDER', label: 'Provider', peekType: 'provider', searchProc: 'scp.get_provider_search', searchSnipId: 'psx' },
             { domain: 'VENDOR', label: 'Vendor', peekType: 'vendor', searchProc: 'scp.get_vendor_search', searchSnipId: 'vsx' },
+            { domain: 'HEALTHPLAN', label: 'Health Plan', peekType: 'healthplan', searchProc: 'scp.get_healthplan_search', searchSnipId: 'hsx' },
         ];
 
         this.search = new Search({ snip: this.Snip, searchMap }); 

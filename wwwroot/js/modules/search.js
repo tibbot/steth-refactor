@@ -411,12 +411,13 @@ export class Search {
         table.id = tableId;
         table.classList.add('srch-tbl');
 
+        const keys = Object.keys(rows[0] || {});
+        const [keyField, ...displayKeys] = keys;
+
         const thead = table.createTHead();
         const headerRow = thead.insertRow();
 
-        const keys = Object.keys(rows[0] || {});
-
-        keys.forEach((key) => {
+        displayKeys.forEach((key) => {
             const th = document.createElement('th');
             th.textContent = key;
             headerRow.appendChild(th);
@@ -426,7 +427,12 @@ export class Search {
 
         rows.forEach((row) => {
             const tr = tbody.insertRow();
-            keys.forEach((key) => {
+
+            // Historical result-set contract:
+            // first return column identifies the row; it is not display data.
+            tr.id = String(row[keyField] ?? '');
+
+            displayKeys.forEach((key) => {
                 const td = tr.insertCell();
                 const value = row[key];
                 td.textContent = value == null ? '' : String(value);
@@ -436,6 +442,6 @@ export class Search {
         container.innerHTML = '';
         container.appendChild(table);
 
-        return { table, keys };
+        return { table, keys: displayKeys };
     }
 }

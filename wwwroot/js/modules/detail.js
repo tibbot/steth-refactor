@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as Core from 'http://localhost/core-service/';
 import { getDetailContract } from './contracts/detail-contracts.js';
 

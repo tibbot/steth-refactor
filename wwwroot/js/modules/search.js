@@ -140,7 +140,7 @@ export class Search {
                 // them back into the main UI.
                 const snip = Core.buildSnip('msg');
                 const msg = `No ${cfg.label.toLowerCase()} records found. Try refining your search.`;
-                await Core.displayAsyncModal?.(snip, msg);
+                await Core.displayAsyncModalSettled(snip, msg);
 
                 // Loop back to the dialog for another attempt
                 continue;

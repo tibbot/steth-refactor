@@ -771,7 +771,9 @@ export class Incident {
         const term = String(input.value ?? '').trim();
         if (!term) return;
 
+        const request = this._beginSubjectRequest(ctx);
         const peekResult = await this.search.peek({ term, domain });
+        if (this._subjectRequests[ctx] !== request || input.value.trim() !== term || this._getActiveDomain(ctx) !== domain) return;
 
         if (!peekResult || peekResult.result !== 1 || !peekResult.selected) {
             input.value = '';
@@ -779,7 +781,7 @@ export class Incident {
             return;
         }
 
-        this._applySearchSelection(ctx, domain, peekResult.selected);
+        await this._applySearchSelection(ctx, domain, peekResult.selected, request);
     }
 
 
@@ -950,6 +952,7 @@ export class Incident {
     }
 
     clearSection(sectionNames) {
+        for (const ctx of sectionNames) this._beginSubjectRequest(ctx);
         const sections = Array.isArray(sectionNames) ? sectionNames : [sectionNames];
         const npd = document.getElementById('npd');
 
@@ -1061,41 +1064,89 @@ export class Incident {
         }
 
         // Ask Search to handle dialog + pkr + selection
+        const request = this._beginSubjectRequest(ctx);
         const result = await this.search.search({ domain });
+        if (this._subjectRequests[ctx] !== request || this._getActiveDomain(ctx) !== domain) return;
 
         // Search handles its own “no rows” + message; we only care if user picked something
         if (!result || result.result !== 1 || !result.selected) {
             return;
         }
 
-        this._applySearchSelection(ctx, domain, result.selected);
+        await this._applySearchSelection(ctx, domain, result.selected, request);
     }
 
-    _applySearchSelection(ctx, domain, selected) {
-        if (!selected || typeof selected !== 'object') return;
+    _beginSubjectRequest(ctx) {
+        this._subjectRequests ??= {};
+        return this._subjectRequests[ctx] = {};
+    }
 
-        const areaRoot = document.querySelector(`#npd [data-area="${ctx}"]`);
-        if (!areaRoot) return;
+    async _applySearchSelection(ctx, domain, identifier, request = this._beginSubjectRequest(ctx)) {
+        const config = {
+            MEMBER: { procedure: 'scp.get_member_detail', parameter: '@p_MEMB_KEYID', id: 'member_id', prefix: 'member' },
+            PROVIDER: { procedure: 'scp.get_provider_detail', parameter: '@p_PROV_KEYID', id: 'provider_tax_id', prefix: 'provider' },
+            VENDOR: { procedure: 'scp.get_vendor_detail', parameter: '@p_VEN_KEYID', id: 'vendor_tax_id', prefix: 'vendor' },
+        }[domain];
+        if (!config || typeof identifier !== 'string' || !identifier.trim()) return;
+        const areaRoot = document.querySelector('#npd [data-area="' + ctx + '"]');
+        const idInput = document.getElementById(ctx + '-id');
+        if (!areaRoot || !idInput) return;
+        const inputValue = idInput.value;
+        const isCurrent = () => this._subjectRequests[ctx] === request &&
+            idInput.value === inputValue && this._getActiveDomain(ctx) === domain && areaRoot.isConnected;
 
-        // 1) Update triad ID input (drives peek/search behavior)
-        const idInputId = ctx === 'customer' ? 'customer-id' : 'reference-id';
-        const idInput = document.getElementById(idInputId);
-
-        if (idInput) {
-            const keyByDomain = {
-                MEMBER: 'member_id',
-                PROVIDER: 'provider_tax_id', // user-search key
-                VENDOR: 'vendorid',          // user-search key
-                OTHER: null,
-            };
-
-            const key = keyByDomain[domain];
-            idInput.value = key ? String(selected[key] ?? '').trim() : '';
+        try {
+            // Original procedure contract: record key, not the displayed search ID.
+            const result = await Core.post('ParameterSQL', {
+                spName: config.procedure,
+                parameters: [{ Key: config.parameter, Value: identifier, Type: 'varchar' }],
+            });
+            if (!isCurrent()) return;
+            const rows = Array.isArray(result) ? result : result?.rows;
+            if (!Array.isArray(rows) || rows.length !== 1 || !rows[0] || typeof rows[0] !== 'object') {
+                throw new Error('Expected exactly one subject detail record.');
+            }
+            const detail = rows[0];
+            const displayId = String(detail[config.id] ?? '').trim();
+            if (!displayId) throw new Error('Subject detail is missing its display identifier.');
+            idInput.value = displayId;
             this.syncNotepadField(idInput);
+            this._bindSubjectDetail(areaRoot, config.prefix, detail);
+        } catch (error) {
+            if (!isCurrent()) return;
+            console.error('[Incident] Subject detail failed', error);
+            const msg = Core.buildSnip('msg');
+            Core.displayAsyncModal?.(msg, 'Unable to load the selected record. Please try again.');
         }
+    }
 
-        // 2) Bind search-derived values into the notepad receipt area
-        this._bindSearchFields(areaRoot, selected);
+    _bindSubjectDetail(root, prefix, detail) {
+        // Customer snippets use data-bind; reference snippets also need data-field.
+        // Original detail procedures use unprefixed name and contact column names.
+        const fields = {
+            memberNumber: ['member_id'], memberLastName: ['member_last_name', 'last_name'],
+            memberFirstName: ['member_first_name', 'first_name'], memberBirthdate: ['member_birthdate', 'birthdate'],
+            memberSex: ['member_sex', 'sex'], memberLanguage: ['member_language', 'language'],
+            memberAddress: ['member_address', 'address'], memberPhone: ['member_phone', 'phone'],
+            providerId: ['provider_id'], providerLastName: ['provider_last_name', 'last_name'],
+            providerFirstName: ['provider_first_name', 'first_name'], providerTaxId: ['provider_tax_id'],
+            providerNpi: ['provider_npi', 'npi'], providerFullName: ['provider_full_name', 'full_name'],
+            providerAddress: ['provider_address', 'address'], providerPhone: ['provider_phone', 'phone'],
+            vendorId: ['vendorid', 'vendor_id'], vendorLastName: ['vendor_last_name', 'last_name'],
+            vendorFirstName: ['vendor_first_name', 'first_name'], vendorTaxId: ['vendor_tax_id'],
+            vendorNpi: ['vendor_npi', 'npi'], vendorFullName: ['vendor_full_name', 'full_name'],
+            vendorAddress: ['vendor_address', 'address'], vendorPhone: ['vendor_phone', 'phone'],
+        };
+        const bindings = {};
+        for (const [field, keys] of Object.entries(fields)) {
+            const value = field.startsWith(prefix)
+                ? keys.map(key => detail[key]).find(value => value != null) : '';
+            bindings[keys[0]] = value ?? '';
+            root.querySelectorAll('[data-field$=".' + field + '"]').forEach(el => {
+                el.textContent = this._formatBindValue(value, el.getAttribute('data-format') || '');
+            });
+        }
+        this._bindSearchFields(root, bindings);
     }
 
     /**

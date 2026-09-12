@@ -89,7 +89,8 @@ export class Search {
         }
 
         if (rows.length === 1) {
-            return { result: 1, rows, selected: rows[0] };
+            const selected = this._rowIdentifier(rows[0]);
+            return selected ? { result: 1, rows, selected } : { result: 0 };
         }
 
         const selected = await this._presentPicker(cfg, rows, {
@@ -354,8 +355,7 @@ export class Search {
                         console.warn('[Search] _presentPicker: invalid row index', idx);
                         return;
                     }
-                    const chosen = rows[idx];
-                    finalize(chosen);
+                    if (rowEl.id) finalize(rowEl.id);
                 });
             } else {
                 table.addEventListener(
@@ -367,10 +367,8 @@ export class Search {
                         const idx = tr.rowIndex - 1;
                         if (Number.isNaN(idx) || idx < 0 || idx >= rows.length) return;
 
-                        const chosen = rows[idx];
-                        finalize(chosen);
+                        if (tr.id) finalize(tr.id);
                     },
-                    { once: true },
                 );
             }
 
@@ -404,6 +402,10 @@ export class Search {
     // --------------------------------------------------
     // Render a simple table inside #search-container
     // --------------------------------------------------
+    _rowIdentifier(row) {
+        return String(row?.[Object.keys(row || {})[0]] ?? '').trim();
+    }
+
     _renderResultsTable(container, rows, cfg) {
         const tableId = cfg.tableId || 'search-result-table';
 
@@ -430,7 +432,7 @@ export class Search {
 
             // Historical result-set contract:
             // first return column identifies the row; it is not display data.
-            tr.id = String(row[keyField] ?? '');
+            tr.id = this._rowIdentifier(row);
 
             displayKeys.forEach((key) => {
                 const td = tr.insertCell();

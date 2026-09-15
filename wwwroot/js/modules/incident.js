@@ -1115,10 +1115,10 @@ export class Incident {
             const raw = row[key];
             const fmt = el.getAttribute('data-format') || '';
 
-            // Empty should clear the div so your [data-label]:not(:empty) logic works
+            // Empty should clear the div so [data-label]:not(:empty) logic works
             const out = this._formatBindValue(raw, fmt);
 
-            // If later you decide some binds should set input.value, you can extend here.
+            // If some binds should set input.value, extend here.
             el.textContent = out;
         });
     }
@@ -1989,16 +1989,73 @@ export class Incident {
     }
 
     async _selectSubject(ctx, domain, keyId) {
-        console.log('[Incident] select subject', { ctx, domain, keyId });
-
         const detail = await this._getSubjectDetail(domain, keyId);
 
-        if (!detail) {
-            console.warn('[Incident] no detail returned', { domain, keyId });
-            return;
+        console.log('[Incident] selected subject detail', {
+            ctx,
+            domain,
+            keyId,
+            detail,
+        });
+    }
+
+    // async _selectSubject(ctx, domain, keyId) {
+    //     console.log('[Incident] select subject', { ctx, domain, keyId });
+
+    //     const detail = await this._getSubjectDetail(domain, keyId);
+
+    //     if (!detail) {
+    //         console.warn('[Incident] no detail returned', { domain, keyId });
+    //         return;
+    //     }
+
+    //     this._applySearchSelection(ctx, domain, detail);
+    // }
+
+    async _getSubjectDetail(domain, keyId) {
+        const detailMap = {
+            MEMBER: {
+                spName: 'scp.get_member_detail',
+                keyName: 'MEMB_KEYID',
+            },
+            PROVIDER: {
+                spName: 'scp.get_provider_detail',
+                keyName: 'PROV_KEYID',
+            },
+            VENDOR: {
+                spName: 'scp.get_vendor_detail',
+                keyName: 'VEN_KEYID',
+            },
+        };
+
+        const cfg = detailMap[domain];
+        if (!cfg) {
+            console.warn('[Incident] no detail configuration', { domain, keyId });
+            return null;
         }
 
-        this._applySearchSelection(ctx, domain, detail);
+        const parameters = [
+            {
+                Key: `@p_${cfg.keyName}`,
+                Value: keyId,
+                Type: 'varchar',
+            },
+        ];
+
+        const payload = {
+            spName: cfg.spName,
+            parameters,
+        };
+
+        const result = await Core.post('ParameterSQL', payload);
+
+        console.log('[Incident] detail result', {
+            domain,
+            keyId,
+            result,
+        });
+
+        return result;
     }
 }
 

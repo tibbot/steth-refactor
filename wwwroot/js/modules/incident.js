@@ -781,7 +781,7 @@ export class Incident {
 
         await this._selectSubject(ctx, domain, peekResult.keyId);
 
-        this._applySearchSelection(ctx, domain, peekResult.selected);
+        // this._applySearchSelection(ctx, domain, peekResult.selected);
     }
 
 
@@ -1070,9 +1070,9 @@ export class Incident {
             return;
         }
 
-        await this._selectSubject(ctx, domain, peekResult.keyId);
+        await this._selectSubject(ctx, domain, result.keyId);
 
-        this._applySearchSelection(ctx, domain, result.selected);
+        // this._applySearchSelection(ctx, domain, result.selected);
     }
 
     _applySearchSelection(ctx, domain, selected) {
@@ -1989,11 +1989,16 @@ export class Incident {
     }
 
     async _selectSubject(ctx, domain, keyId) {
-        console.log('[Incident] select subject', {
-            ctx,
-            domain,
-            keyId,
-        });
+        console.log('[Incident] select subject', { ctx, domain, keyId });
+
+        const detail = await this._getSubjectDetail(domain, keyId);
+
+        if (!detail) {
+            console.warn('[Incident] no detail returned', { domain, keyId });
+            return;
+        }
+
+        this._applySearchSelection(ctx, domain, detail);
     }
 }
 

@@ -676,7 +676,7 @@ export class Incident {
         const customerIdEl = document.getElementById('customer-id');
         const customerId = customerIdEl?.value?.trim();
 
-        const validCats = ['MEMBER', 'PROVIDER', 'VENDOR'];
+        const validCats = ['MEMBER', 'PROVIDER', 'VENDOR', 'HEALTHPLAN'];
         const isValidCategory = validCats.includes(customerCategory || '');
 
         const refRadios = document.querySelectorAll('input[name="reference.category"]');
@@ -1055,7 +1055,7 @@ export class Incident {
 
         const domain = String(searchType || '').toUpperCase();
 
-        if (!['MEMBER', 'PROVIDER', 'VENDOR'].includes(domain)) {
+        if (!['MEMBER', 'PROVIDER', 'VENDOR', 'HEALTHPLAN'].includes(domain)) {
             console.warn('[Incident] drawSearch – unsupported domain:', domain);
             return;
         }

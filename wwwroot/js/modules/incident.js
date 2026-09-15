@@ -781,7 +781,6 @@ export class Incident {
 
         await this._selectSubject(ctx, domain, peekResult.keyId);
 
-        // this._applySearchSelection(ctx, domain, peekResult.selected);
     }
 
 
@@ -1072,7 +1071,6 @@ export class Incident {
 
         await this._selectSubject(ctx, domain, result.keyId);
 
-        // this._applySearchSelection(ctx, domain, result.selected);
     }
 
     _applySearchSelection(ctx, domain, selected) {
@@ -1989,28 +1987,17 @@ export class Incident {
     }
 
     async _selectSubject(ctx, domain, keyId) {
+        console.log('[Incident] select subject', { ctx, domain, keyId });
+
         const detail = await this._getSubjectDetail(domain, keyId);
 
-        console.log('[Incident] selected subject detail', {
-            ctx,
-            domain,
-            keyId,
-            detail,
-        });
+        if (!detail) {
+            console.warn('[Incident] no detail returned', { domain, keyId });
+            return;
+        }
+
+        this._applySearchSelection(ctx, domain, detail);
     }
-
-    // async _selectSubject(ctx, domain, keyId) {
-    //     console.log('[Incident] select subject', { ctx, domain, keyId });
-
-    //     const detail = await this._getSubjectDetail(domain, keyId);
-
-    //     if (!detail) {
-    //         console.warn('[Incident] no detail returned', { domain, keyId });
-    //         return;
-    //     }
-
-    //     this._applySearchSelection(ctx, domain, detail);
-    // }
 
     async _getSubjectDetail(domain, keyId) {
         const detailMap = {
@@ -2049,13 +2036,15 @@ export class Incident {
 
         const result = await Core.post('ParameterSQL', payload);
 
-        console.log('[Incident] detail result', {
-            domain,
-            keyId,
-            result,
-        });
+        if (!Array.isArray(result) || result.length === 0) {
+            console.warn('[Incident] no subject detail returned', {
+                domain,
+                keyId,
+            });
+            return null;
+        }
 
-        return result;
+        return result[0];
     }
 }
 

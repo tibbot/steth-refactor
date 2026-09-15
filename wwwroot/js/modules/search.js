@@ -88,22 +88,39 @@ export class Search {
             return { result: 0 };
         }
 
-        if (rows.length === 1) {
-            return { result: 1, rows, selected: rows[0] };
+        const peek = rows[0];
+        const keyId = peek?.keyid;
+        const keyCount = Number(peek?.key_count || 0);
+
+        if (keyCount === 1 && keyId) {
+            return {
+                result: 1,
+                keyId,
+            };
         }
 
-        const selected = await this._presentPicker(cfg, rows, {
-            header: `${cfg.label} matches for "${trimmed}"`,
-            allowQueryAgain: true,
-        });
-
-        if (selected === '__query_again__') {
+        if (keyCount > 1) {
             return this.search({ domain: cfg.domain });
         }
 
-        if (!selected) return { result: 0 };
+        return { result: 0 };
 
-        return { result: 1, rows, selected };
+        // if (rows.length === 1) {
+        //     return { result: 1, rows, selected: rows[0] };
+        // }
+
+        // const selected = await this._presentPicker(cfg, rows, {
+        //     header: `${cfg.label} matches for "${trimmed}"`,
+        //     allowQueryAgain: true,
+        // });
+
+        // if (selected === '__query_again__') {
+        //     return this.search({ domain: cfg.domain });
+        // }
+
+        // if (!selected) return { result: 0 };
+
+        // return { result: 1, rows, selected };
     }
 
 
@@ -163,11 +180,15 @@ export class Search {
                 return { result: 0 };
             }
 
+            const keyField = Object.keys(selected)[0];
+            const keyId = selected[keyField];
+
             // Success path: user chose a row
             return {
                 result: 1,
                 rows,
                 selected,
+                keyId,
             };
         }
     }

@@ -773,11 +773,13 @@ export class Incident {
 
         const peekResult = await this.search.peek({ term, domain });
 
-        if (!peekResult || peekResult.result !== 1 || !peekResult.selected) {
+        if (!peekResult || peekResult.result !== 1 || !peekResult.keyId) {
             input.value = '';
             this.syncNotepadField(input);
             return;
         }
+
+        await this._selectSubject(ctx, domain, peekResult.keyId);
 
         this._applySearchSelection(ctx, domain, peekResult.selected);
     }
@@ -1067,6 +1069,8 @@ export class Incident {
         if (!result || result.result !== 1 || !result.selected) {
             return;
         }
+
+        await this._selectSubject(ctx, domain, peekResult.keyId);
 
         this._applySearchSelection(ctx, domain, result.selected);
     }
@@ -1984,5 +1988,12 @@ export class Incident {
         return await res.json();
     }
 
+    async _selectSubject(ctx, domain, keyId) {
+        console.log('[Incident] select subject', {
+            ctx,
+            domain,
+            keyId,
+        });
+    }
 }
 

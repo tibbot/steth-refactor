@@ -87,42 +87,42 @@
                         <div id="reference_artifact_identifier" data-field="reference.artifactId" data-label-from="reference.artifactType" data-label-suffix=" ID"></div>
                     </div>
                     <div class="nps">
-                        <div id="ref_mbr_id" data-field="reference.memberNumber" data-label="Member Number"></div>
-                        <div id="ref_mbr_last_name" data-field="reference.memberLastName" data-label="Last Name"></div>
-                        <div id="ref_mbr_first_name" data-field="reference.memberFirstName" data-label="First Name"></div>
+                        <div id="ref_mbr_id" data-field="reference.memberNumber" data-label="Member Number" data-bind="member_id"></div>
+                        <div id="ref_mbr_last_name" data-field="reference.memberLastName" data-label="Last Name" data-bind="member_last_name"></div>
+                        <div id="ref_mbr_first_name" data-field="reference.memberFirstName" data-label="First Name" data-bind="member_first_name"></div>
                     </div>
                     <div class="nps">
-                        <div id="ref_mbr_birthdate" data-field="reference.memberBirthdate" data-label="Date of Birth"></div>
-                        <div id="ref_mbr_sex" data-field="reference.memberSex" data-label="Sex"></div>
-                        <div id="ref_mbr_language" data-field="reference.memberLanguage" data-label="Language"></div>
+                        <div id="ref_mbr_birthdate" data-field="reference.memberBirthdate" data-label="Date of Birth" data-bind="member_birthdate"></div>
+                        <div id="ref_mbr_sex" data-field="reference.memberSex" data-label="Sex" data-bind="member_sex"></div>
+                        <div id="ref_mbr_language" data-field="reference.memberLanguage" data-label="Language" data-bind="member_language"></div>
                     </div>
-                    <div class="nps"><div id="ref_mbr_address" class="npn" data-field="reference.memberAddress" data-label="Address"></div></div>
-                    <div class="nps"><div id="ref_mbr_phone" data-field="reference.memberPhone" data-label="Phone"></div></div>
+                    <div class="nps"><div id="ref_mbr_address" class="npn" data-field="reference.memberAddress" data-label="Address" data-bind="member_address"></div></div>
+                    <div class="nps"><div id="ref_mbr_phone" data-field="reference.memberPhone" data-label="Phone" data-bind="member_phone"></div></div>
                     <div class="nps">
-                        <div id="ref_prv_id" data-field="reference.providerId" data-label="Provider ID"></div>
-                        <div id="ref_prv_last_name" data-field="reference.providerLastName" data-label="Last Name"></div>
-                        <div id="ref_prv_first_name" data-field="reference.providerFirstName" data-label="First Name"></div>
-                    </div>
-                    <div class="nps">
-                        <div id="ref_prv_tax_id" data-field="reference.providerTaxId" data-label="Tax ID"></div>
-                        <div id="ref_prv_npi" data-field="reference.providerNpi" data-label="NPI"></div>
-                        <div id="ref_prv_full_name" data-field="reference.providerFullName" data-label="Full Name"></div>
-                    </div>
-                    <div class="nps"><div id="ref_prv_address" class="npn" data-field="reference.providerAddress" data-label="Address"></div></div>
-                    <div class="nps"><div id="ref_prv_phone" data-field="reference.providerPhone" data-label="Phone"></div></div>
-                    <div class="nps">
-                        <div id="ref_ven_id" data-field="reference.vendorId" data-label="Vendor ID"></div>
-                        <div id="ref_ven_last_name" data-field="reference.vendorLastName" data-label="Last Name"></div>
-                        <div id="ref_ven_first_name" data-field="reference.vendorFirstName" data-label="First Name"></div>
+                        <div id="ref_prv_id" data-field="reference.providerId" data-label="Provider ID" data-bind="provider_id"></div>
+                        <div id="ref_prv_last_name" data-field="reference.providerLastName" data-label="Last Name" data-bind="provider_last_name"></div>
+                        <div id="ref_prv_first_name" data-field="reference.providerFirstName" data-label="First Name" data-bind="provider_first_name"></div>
                     </div>
                     <div class="nps">
-                        <div id="ref_ven_tax_id" data-field="reference.vendorTaxId" data-label="Tax ID"></div>
-                        <div id="ref_ven_npi" data-field="reference.vendorNpi" data-label="NPI"></div>
-                        <div id="ref_ven_full_name" data-field="reference.vendorFullName" data-label="Full Name"></div>
+                        <div id="ref_prv_tax_id" data-field="reference.providerTaxId" data-label="Tax ID" data-bind="provider_tax_id"></div>
+                        <div id="ref_prv_npi" data-field="reference.providerNpi" data-label="NPI" data-bind="provider_npi"></div>
+                        <div id="ref_prv_full_name" data-field="reference.providerFullName" data-label="Full Name" data-bind="provider_full_name"></div>
                     </div>
-                    <div class="nps"><div id="ref_ven_address" class="npn" data-field="reference.vendorAddress" data-label="Address"></div></div>
-                    <div class="nps"><div id="ref_ven_phone" data-field="reference.vendorPhone" data-label="Phone"></div></div>
-                    <div class="nps"><div id="ref_other" class="npn" data-field="reference.other" data-label="Other"></div></div>
+                    <div class="nps"><div id="ref_prv_address" class="npn" data-field="reference.providerAddress" data-label="Address" data-bind="provider_address"></div></div>
+                    <div class="nps"><div id="ref_prv_phone" data-field="reference.providerPhone" data-label="Phone" data-bind="provider_phone"></div></div>
+                    <div class="nps">
+                        <div id="ref_ven_id" data-field="reference.vendorId" data-label="Vendor ID" data-bind="vendorid"></div>
+                        <div id="ref_ven_last_name" data-field="reference.vendorLastName" data-label="Last Name" data-bind="vendor_last_name"></div>
+                        <div id="ref_ven_first_name" data-field="reference.vendorFirstName" data-label="First Name" data-bind="vendor_first_name"></div>
+                    </div>
+                    <div class="nps">
+                        <div id="ref_ven_tax_id" data-field="reference.vendorTaxId" data-label="Tax ID" data-bind="vendor_tax_id"></div>
+                        <div id="ref_ven_npi" data-field="reference.vendorNpi" data-label="NPI" data-bind="vendor_npi"></div>
+                        <div id="ref_ven_full_name" data-field="reference.vendorFullName" data-label="Full Name" data-bind="vendor_full_name"></div>
+                    </div>
+                    <div class="nps"><div id="ref_ven_address" class="npn" data-field="reference.vendorAddress" data-label="Address" data-bind="vendor_address"></div></div>
+                    <div class="nps"><div id="ref_ven_phone" data-field="reference.vendorPhone" data-label="Phone" data-bind="vendor_phone"></div></div>
+                    <div class="nps"><div id="ref_other" class="npn" data-field="reference.other" data-label="Other" data-bind="other"></div></div>
                     <div class="nps">
                         <div id="ref_type" data-field="reference.type" data-label="Type"></div>
                         <div id="ref_sub_type" data-field="reference.subtype" data-label="Sub Type"></div>

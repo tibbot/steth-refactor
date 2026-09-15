@@ -1073,6 +1073,42 @@ export class Incident {
 
     }
 
+    _normalizeSubjectDetail(domain, row) {
+        switch (domain) {
+            case 'MEMBER':
+                return {
+                    ...row,
+                    member_last_name: row.last_name,
+                    member_first_name: row.first_name,
+                    member_birthdate: row.birthdate,
+                    member_sex: row.sex,
+                    member_language: row.language,
+                    member_address: row.address,
+                    member_phone: row.phone,
+                };
+            case 'PROVIDER':
+                return {
+                    ...row,
+                    provider_last_name: row.last_name,
+                    provider_first_name: row.first_name,
+                    provider_provider_tax_id: row.provider_tax_id,
+                    provider_npi: row.npi,
+                    provider_full_name: row.full_name,
+                    provider_[address]: row.[address],
+                };
+            case 'VENDOR':
+                return {
+                    vendor_vendor_id: row.vendor_id,
+                    vendor_vendor_tax_id: row.vendor_tax_id,
+                    vendor_npi: row.npi,
+                    vendor_full_name: row.full_name,
+                    vendor_address: row.address,
+                };
+            default:
+                return row;
+        }
+    }
+
     _applySearchSelection(ctx, domain, selected) {
         if (!selected || typeof selected !== 'object') return;
 
@@ -1087,7 +1123,7 @@ export class Incident {
             const keyByDomain = {
                 MEMBER: 'member_id',
                 PROVIDER: 'provider_tax_id', // user-search key
-                VENDOR: 'vendorid',          // user-search key
+                VENDOR: 'vendor_id',          // user-search key
                 OTHER: null,
             };
 
@@ -1996,7 +2032,9 @@ export class Incident {
             return;
         }
 
-        this._applySearchSelection(ctx, domain, detail);
+        const normalized = this._normalizeSubjectDetail(domain, detail);
+
+        this._applySearchSelection(ctx, domain, normalized);
     }
 
     async _getSubjectDetail(domain, keyId) {

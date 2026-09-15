@@ -1,0 +1,150 @@
+<div class="content-container">
+    <h2>NPI Registry Search</h2>
+    <div class="brk"></div>
+    <div class="trp"><input id="npi-number" class="inp" name="npi-input" placeholder="NPI Number" /><button id="npi-btn" class="sbn" type="button" tabindex="-1">…</button><label class="lbl" class="lbl" for="npi-number">NPI Number</label></div>
+    <div id="npiq" name="npi-panel" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; grid-column: span 6; padding: 10px">
+        <div style="border: 1px solid var(--primary-color); border-radius: 0.5rem; padding: 1rem">
+            <h2>CMS Result</h2>
+            <div class="npd-form"><input class="lbn" name="import-all" type="button" value="Stage" /><input class="lbn" name="start-over" type="button" value="Clear" /></div>
+            <div class="nppes" name="nppes-data">
+                <fieldset>
+                    <legend>Basic Information</legend>
+                    <div class="nps">
+                        <div class="nppes-detail" name="number" data-label="NPI" data-bind="nhdr.number"></div>
+                        <div class="nppes-detail" name="enumeration_type" data-label="Type" data-bind="nhdr.enumeration_type"></div>
+                        <div class="nppes-detail" name="status" data-label="Status" data-bind="basic.status"></div>
+                    </div>
+                    <div class="nps"><div class="nppes-detail" name="display_name" data-label="Display Name" data-bind="basic.display_name"></div></div>
+                    <div class="nps">
+                        <div class="nppes-detail" name="first_name" data-label="First Name" data-bind="basic.first_name"></div>
+                        <div class="nppes-detail" name="last_name" data-label="Last Name" data-bind="basic.last_name"></div>
+                        <div class="nppes-detail" name="middle_name" data-label="Middle Name" data-bind="basic.middle_name"></div>
+                    </div>
+                    <div class="nps">
+                        <div class="nppes-detail" name="credential" data-label="Credential" data-bind="basic.credential"></div>
+                        <div class="nppes-detail" name="sex" data-label="Sex" data-bind="basic.sex"></div>
+                        <div class="nppes-detail" name="sole_proprietor" data-label="Sole Proprietor" data-bind="basic.sole_proprietor"></div>
+                    </div>
+                    <div class="nps">
+                        <div class="nppes-detail" name="enumeration_date" data-label="Created Date" data-bind="basic.enumeration_date"></div>
+                        <div class="nppes-detail" name="last_updated" data-label="Last Update" data-bind="basic.last_updated"></div>
+                        <div class="nppes-detail" name="certification_date" data-label="Certification Date" data-bind="basic.certification_date"></div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>Addresses</legend>
+                    <div class="nps">
+                        <div class="nppes-detail" name="address_1" data-label="Address 1" data-bind="addr.address_1"></div>
+                        <div class="nppes-detail" name="address_2" data-label="Address 2" data-bind="addr.address_2"></div>
+                    </div>
+                    <div class="nps">
+                        <div class="nppes-detail" name="city" data-label="City" data-bind="addr.city"></div>
+                        <div class="nppes-detail" name="state" data-label="State" data-bind="addr.state"></div>
+                        <div class="nppes-detail" name="postal_code" data-label="Postal Code" data-bind="addr.postal_code"></div>
+                    </div>
+                    <div class="nps">
+                        <div class="nppes-detail" name="country_code" data-label="Country Code" data-bind="addr.country_code"></div>
+                        <div class="nppes-detail" name="country_name" data-label="Country Name" data-bind="addr.country_name"></div>
+                    </div>
+                    <div class="nps">
+                        <div class="nppes-detail" name="telephone_number" data-label="Telephone" data-bind="addr.telephone_number"></div>
+                        <div class="nppes-detail" name="fax_number" data-label="Fax" data-bind="addr.fax_number"></div>
+                    </div>
+                    <div class="nps">
+                        <div class="nppes-detail" name="address_purpose" data-label="Address Purpose" data-bind="addr.address_purpose"></div>
+                        <div class="nppes-detail" name="address_type" data-label="Address Type" data-bind="addr.address_type"></div>
+                    </div>
+                    <div class="nps"><div class="npn" name="addresses" data-label="Addresses" data-table="addr"></div></div>
+                    <div class="nps nps-action"><input class="lbn" name="disp-addr" type="button" value="Show Detail" /></div>
+                </fieldset>
+                <fieldset>
+                    <legend>Practice Locations</legend>
+                    <div class="nps">
+                        <div class="nppes-detail" name="address_1" data-label="Address 1" data-bind="ploc.address_1"></div>
+                        <div class="nppes-detail" name="address_2" data-label="Address 2" data-bind="ploc.address_2"></div>
+                    </div>
+                    <div class="nps">
+                        <div class="nppes-detail" name="city" data-label="City" data-bind="ploc.city"></div>
+                        <div class="nppes-detail" name="state" data-label="State" data-bind="ploc.state"></div>
+                        <div class="nppes-detail" name="postal_code" data-label="Postal Code" data-bind="ploc.postal_code"></div>
+                    </div>
+                    <div class="nps">
+                        <div class="nppes-detail" name="telephone_number" data-label="Telephone" data-bind="ploc.telephone_number"></div>
+                        <div class="nppes-detail" name="fax_number" data-label="Fax" data-bind="ploc.fax_number"></div>
+                        <div class="nppes-detail" name="country_code" data-label="Country" data-bind="ploc.country_code"></div>
+                    </div>
+                    <div class="nps"><div class="npn" name="practiceLocations" data-label="Practice Locations" data-table="ploc"></div></div>
+                    <div class="nps nps-action"><input class="lbn" name="disp-ploc" type="button" value="Show Detail" /></div>
+                </fieldset>
+                <fieldset>
+                    <legend>Taxonomy</legend>
+                    <div class="nps">
+                        <div class="nppes-detail" name="code" data-label="Taxonomy Code" data-bind="taxo.code"></div>
+                        <div class="nppes-detail" name="desc" data-label="Description" data-bind="taxo.desc"></div>
+                        <div class="nppes-detail" name="taxonomy_group" data-label="Taxonomy Group" data-bind="taxo.taxonomy_group"></div>
+                    </div>
+                    <div class="nps">
+                        <div class="nppes-detail" name="state" data-label="State" data-bind="taxo.state"></div>
+                        <div class="nppes-detail" name="license" data-label="License" data-bind="taxo.license"></div>
+                        <div class="nppes-detail" name="primary" data-label="Primary" data-bind="taxo.primary"></div>
+                    </div>
+                    <div class="nps"><div class="npn" name="taxonomies" data-label="Taxonomies" data-table="taxo"></div></div>
+                    <div class="nps nps-action"><input class="lbn" name="disp-taxo" type="button" value="Show Detail" /></div>
+                </fieldset>
+                <fieldset>
+                    <legend>Identifiers</legend>
+                    <div class="nps">
+                        <div class="nppes-detail" name="identifier" data-label="Identifier" data-bind="idnt.identifier"></div>
+                        <div class="nppes-detail" name="state" data-label="State" data-bind="idnt.state"></div>
+                        <div class="nppes-detail" name="issuer" data-label="Issuer" data-bind="idnt.issuer"></div>
+                    </div>
+                    <div class="nps">
+                        <div class="nppes-detail" name="code" data-label="Code" data-bind="idnt.code"></div>
+                        <div class="nppes-detail" name="desc" data-label="Description" data-bind="idnt.desc"></div>
+                    </div>
+                    <div class="nps"><div class="npn" name="identifiers" data-label="Identifiers" data-table="idnt"></div></div>
+                    <div class="nps nps-action"><input class="lbn" name="disp-idnt" type="button" value="Show Detail" /></div>
+                </fieldset>
+                <fieldset>
+                    <legend>Endpoints</legend>
+                    <div class="nps">
+                        <div class="nppes-detail" name="endpoint" data-label="endpoint" data-bind="endp.endpoint"></div>
+                        <div class="nppes-detail" name="endpoint_type" data-label="endpoint_type" data-bind="endp.endpoint_type"></div>
+                        <div class="nppes-detail" name="endpoint_description" data-label="endpoint_description" data-bind="endp.endpoint_description"></div>
+                    </div>
+                    <div class="nps">
+                        <div class="nppes-detail" name="affiliation" data-label="affiliation" data-bind="endp.affiliation"></div>
+                        <div class="nppes-detail" name="use" data-label="use" data-bind="endp.use"></div>
+                        <div class="nppes-detail" name="content_type" data-label="content_type" data-bind="endp.content_type"></div>
+                    </div>
+                    <div class="nps"><div class="nppes-detail" name="content_other_description" data-label="content_other_description" data-bind="endp.content_other_description"></div></div>
+                    <div class="nps"><div class="npn" name="endpoints" data-label="Endpoints" data-table="endp"></div></div>
+                    <div class="nps nps-action"><input class="lbn" name="disp-endp" type="button" value="Show Detail" /></div>
+                </fieldset>
+                <fieldset>
+                    <legend>Other Names</legend>
+                    <div class="nps">
+                        <div class="nppes-detail" name="first_name" data-label="First Name" data-bind="othn.first_name"></div>
+                        <div class="nppes-detail" name="last_name" data-label="Last Name" data-bind="othn.last_name"></div>
+                        <div class="nppes-detail" name="middle_name" data-label="Middle Name" data-bind="othn.middle_name"></div>
+                    </div>
+                    <div class="nps">
+                        <div class="nppes-detail" name="type" data-label="Type" data-bind="othn.type"></div>
+                        <div class="nppes-detail" name="organization_name" data-label="Organization Name" data-bind="othn.organization_name"></div>
+                        <div class="nppes-detail" name="credential" data-label="Credential" data-bind="othn.credential"></div>
+                    </div>
+                    <div class="nps">
+                        <div class="nppes-detail" name="prefix" data-label="Prefix" data-bind="othn.prefix"></div>
+                        <div class="nppes-detail" name="suffix" data-label="Suffix" data-bind="othn.suffix"></div>
+                    </div>
+                    <div class="nps"><div class="npn" name="other_names" data-label="Other Names" data-table="othn"></div></div>
+                    <div class="nps nps-action"><input class="lbn" name="disp-othn" type="button" value="Show Detail" /></div>
+                </fieldset>
+            </div>
+        </div>
+        <div style="border: 1px solid var(--primary-color); border-radius: 0.5rem; padding: 1rem">
+            <h2>Staging</h2>
+            <div class="npd-form"><input class="lbn" name="ingest-staged" type="button" value="Ingest" /><input class="lbn" name="clear-staged" type="button" value="Clear" /></div>
+        </div>
+    </div>
+</div>

@@ -1197,7 +1197,7 @@ export class Incident {
     async _fetchCsiNo() {
         try {
             
-            const username = this.agentId || this.agentId.trim() || '';
+            const username = this.agentId || '';
 
             if (!username) {
                 Core.error?.('[incident] Missing Agent for CSINO fetch');

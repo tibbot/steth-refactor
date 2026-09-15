@@ -1,0 +1,44 @@
+<dialog id="navg-filter-dialog" class="navg-filter" aria-labelledby="navg-filter-title">
+    <div class="navg-filter__header">
+        <h2 id="navg-filter-title" class="navg-filter__title">Filter Results</h2>
+        <div class="navg-filter__context"></div>
+    </div>
+    <form class="navg-filter__form" method="dialog">
+        <div class="navg-filter__groups">
+            <fieldset class="navg-filter__group" data-filter-group="dateRange">
+                <legend class="navg-filter__legend">Date Range</legend>
+                <div class="navg-filter__available"></div>
+                <div class="navg-filter__host navg-filter__host--dates" data-filter-host="dateRange"></div>
+                <div class="navg-filter__group-footer"><span class="navg-filter__count" data-filter-count="dateRange"></span><button class="navg-filter__clear-group" type="button" data-filter-action="clear-group" data-filter-target="dateRange">Clear</button></div>
+            </fieldset>
+            <fieldset class="navg-filter__group" data-filter-group="provider">
+                <legend class="navg-filter__legend">Providers</legend>
+                <div class="navg-filter__host" data-filter-host="provider"></div>
+                <div class="navg-filter__group-footer"><span class="navg-filter__count" data-filter-count="provider">0 selected</span><button class="navg-filter__clear-group" type="button" data-filter-action="clear-group" data-filter-target="provider">Clear</button></div>
+            </fieldset>
+            <fieldset class="navg-filter__group" data-filter-group="vendor">
+                <legend class="navg-filter__legend">Vendors</legend>
+                <div class="navg-filter__host" data-filter-host="vendor"></div>
+                <div class="navg-filter__group-footer"><span class="navg-filter__count" data-filter-count="vendor">0 selected</span><button class="navg-filter__clear-group" type="button" data-filter-action="clear-group" data-filter-target="vendor">Clear</button></div>
+            </fieldset>
+            <fieldset class="navg-filter__group" data-filter-group="specialty">
+                <legend class="navg-filter__legend">Specialties</legend>
+                <div class="navg-filter__host" data-filter-host="specialty"></div>
+                <div class="navg-filter__group-footer"><span class="navg-filter__count" data-filter-count="specialty">0 selected</span><button class="navg-filter__clear-group" type="button" data-filter-action="clear-group" data-filter-target="specialty">Clear</button></div>
+            </fieldset>
+            <fieldset class="navg-filter__group" data-filter-group="diagnosis">
+                <legend class="navg-filter__legend">Diagnoses</legend>
+                <div class="navg-filter__host" data-filter-host="diagnosis"></div>
+                <div class="navg-filter__group-footer"><span class="navg-filter__count" data-filter-count="diagnosis">0 selected</span><button class="navg-filter__clear-group" type="button" data-filter-action="clear-group" data-filter-target="diagnosis">Clear</button></div>
+            </fieldset>
+            <fieldset class="navg-filter__group" data-filter-group="serviceCode">
+                <legend class="navg-filter__legend">Service Codes</legend>
+                <div class="navg-filter__host" data-filter-host="serviceCode"></div>
+                <div class="navg-filter__group-footer"><span class="navg-filter__count" data-filter-count="serviceCode">0 selected</span><button class="navg-filter__clear-group" type="button" data-filter-action="clear-group" data-filter-target="serviceCode">Clear</button></div>
+            </fieldset>
+        </div>
+        <div class="navg-filter__message" aria-live="polite" role="status"></div>
+        <div class="navg-filter__sync"><input id="navg-filter-sync" type="checkbox" /><label for="navg-filter-sync">Apply compatible criteria to all result sets</label></div>
+        <div class="navg-filter__actions"><button class="lbn navg-filter__apply" type="button" data-filter-action="apply">Apply Filter</button><button class="lbn navg-filter__clear-all" type="button" data-filter-action="clear-all">Clear All</button><button class="lbn navg-filter__cancel" type="button" data-filter-action="cancel">Cancel</button></div>
+    </form>
+</dialog>

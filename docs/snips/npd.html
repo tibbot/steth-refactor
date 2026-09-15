@@ -1,0 +1,150 @@
+<div id="npd">
+    <div class="npd-container">
+        <div class="icon npd-icon" title="Hide the Notepad">&rarr;</div>
+        <div id="scp-incident" class="scp-incident">
+            <div class="npd-form"><input id="save-more-btn" class="lbn" type="button" value="Save & More" /><input id="save-new-btn" class="lbn" type="button" value="Save & New" /><input id="reset-btn" class="lbn" type="button" value="Clear All" /></div>
+            <fieldset>
+                <legend>Incident</legend>
+                <div class="nps"><div id="incident_number" data-label="Incident Number"></div></div>
+                <div class="nps">
+                    <div id="contact_category" data-field="contact.category" data-label="Contact Type"></div>
+                    <div id="incident_open_date" data-field="incident.openDate" data-label="Open Date"></div>
+                    <div id="incident_close_date" data-field="incident.closeDate" data-label="Close Date"></div>
+                </div>
+                <div class="nps">
+                    <div id="ctc_start" data-field="incident.startTime" data-label="Start"></div>
+                    <div id="ctc_elapsed" data-field="incident.elapsed" data-label="Elapsed"></div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Contact</legend>
+                <div class="nps">
+                    <div id="ctc_first_name" data-field="contact.firstName" data-label="First Name"></div>
+                    <div id="ctc_last_name" data-field="contact.lastName" data-label="Last Name"></div>
+                    <div id="ctc_relation" data-field="contact.relationship" data-label="Relationship"></div>
+                </div>
+                <div class="nps">
+                    <div id="ctc_phone" data-field="contact.phone" data-label="Phone"></div>
+                    <div id="ctc_fax" data-field="contact.fax" data-label="Fax"></div>
+                    <div id="ctc_email" data-field="contact.email" data-label="Email"></div>
+                </div>
+                <div class="nps"><div id="ctc_note" class="npn" data-field="contact.reason" data-label="Reason"></div></div>
+            </fieldset>
+            <div data-area="customer">
+                <fieldset>
+                    <legend>Customer</legend>
+                    <div class="nps"><div id="customer_category" data-field="customer.category" data-label="Customer"></div></div>
+                    <div class="nps">
+                        <div id="cust_mbr_id" data-field="customer.memberNumber" data-label="Member Number" data-bind="member_id"></div>
+                        <div id="cust_mbr_last_name" data-field="customer.memberLastName" data-label="Last Name" data-bind="member_last_name"></div>
+                        <div id="cust_mbr_first_name" data-field="customer.memberFirstName" data-label="First Name" data-bind="member_first_name"></div>
+                    </div>
+                    <div class="nps">
+                        <div id="cust_mbr_birthdate" data-field="customer.memberBirthdate" data-label="Date of Birth" data-bind="member_birthdate"></div>
+                        <div id="cust_mbr_sex" data-field="customer.memberSex" data-label="Sex" data-bind="member_sex"></div>
+                        <div id="cust_mbr_language" data-field="customer.memberLanguage" data-label="Language" data-bind="member_language"></div>
+                    </div>
+                    <div class="nps"><div id="cust_mbr_address" class="npn" data-field="customer.memberAddress" data-label="Address" data-bind="member_address"></div></div>
+                    <div class="nps"><div id="cust_mbr_phone" data-field="customer.memberPhone" data-label="Phone" data-bind="member_phone"></div></div>
+                    <div class="nps">
+                        <div id="cust_prv_id" data-field="customer.providerId" data-label="Provider ID" data-bind="provider_id"></div>
+                        <div id="cust_prv_last_name" data-field="customer.providerLastName" data-label="Last Name" data-bind="provider_last_name"></div>
+                        <div id="cust_prv_first_name" data-field="customer.providerFirstName" data-label="First Name" data-bind="provider_first_name"></div>
+                    </div>
+                    <div class="nps">
+                        <div id="cust_prv_tax_id" data-field="customer.providerTaxId" data-label="Tax ID" data-bind="provider_tax_id"></div>
+                        <div id="cust_prv_npi" data-field="customer.providerNpi" data-label="NPI" data-bind="provider_npi"></div>
+                        <div id="cust_prv_full_name" data-field="customer.providerFullName" data-label="Full Name" data-bind="provider_full_name"></div>
+                    </div>
+                    <div class="nps"><div id="cust_prv_address" class="npn" data-field="customer.providerAddress" data-label="Address" data-bind="provider_address"></div></div>
+                    <div class="nps"><div id="cust_prv_phone" data-field="customer.providerPhone" data-label="Phone" data-bind="provider_phone"></div></div>
+                    <div class="nps">
+                        <div id="cust_ven_id" data-field="customer.vendorId" data-label="Vendor ID" data-bind="vendorid"></div>
+                        <div id="cust_ven_last_name" data-field="customer.vendorLastName" data-label="Last Name" data-bind="vendor_last_name"></div>
+                        <div id="cust_ven_first_name" data-field="customer.vendorFirstName" data-label="First Name" data-bind="vendor_first_name"></div>
+                    </div>
+                    <div class="nps">
+                        <div id="cust_ven_tax_id" data-field="customer.vendorTaxId" data-label="Tax ID" data-bind="vendor_tax_id"></div>
+                        <div id="cust_ven_npi" data-field="customer.vendorNpi" data-label="NPI" data-bind="vendor_npi"></div>
+                        <div id="cust_ven_full_name" data-field="customer.vendorFullName" data-label="Full Name" data-bind="vendor_full_name"></div>
+                    </div>
+                    <div class="nps"><div id="cust_ven_address" class="npn" data-field="customer.vendorAddress" data-label="Address" data-bind="vendor_address"></div></div>
+                    <div class="nps"><div id="cust_ven_phone" data-field="customer.vendorPhone" data-label="Phone" data-bind="vendor_phone"></div></div>
+                    <div class="nps">
+                        <div id="cust_hpl_abbr" data-field="customer.healthplanAbbr" data-label="Health Plan Code" data-bind="healthplan_code"></div>
+                        <div id="cust_hpl_name" data-field="customer.healthplanName" data-label="Health Plan Name" data-bind="healthplan_name"></div>
+                    </div>
+                    <div class="nps"><div id="cust_other" class="npn" data-field="customer.other" data-label="Other"></div></div>
+                    <div class="nps"><div id="cst_note" class="npn" data-field="customer.note" data-label="Note"></div></div>
+                </fieldset>
+            </div>
+            <div data-area="reference">
+                <fieldset>
+                    <legend>Reference</legend>
+                    <div class="nps">
+                        <div id="reference_category" data-field="reference.category" data-label="Reference"></div>
+                        <div id="reference_artifact_type" data-field="reference.artifactType" data-label="Detail"></div>
+                        <div id="reference_artifact_identifier" data-field="reference.artifactId" data-label-from="reference.artifactType" data-label-suffix=" ID"></div>
+                    </div>
+                    <div class="nps">
+                        <div id="ref_mbr_id" data-field="reference.memberNumber" data-label="Member Number"></div>
+                        <div id="ref_mbr_last_name" data-field="reference.memberLastName" data-label="Last Name"></div>
+                        <div id="ref_mbr_first_name" data-field="reference.memberFirstName" data-label="First Name"></div>
+                    </div>
+                    <div class="nps">
+                        <div id="ref_mbr_birthdate" data-field="reference.memberBirthdate" data-label="Date of Birth"></div>
+                        <div id="ref_mbr_sex" data-field="reference.memberSex" data-label="Sex"></div>
+                        <div id="ref_mbr_language" data-field="reference.memberLanguage" data-label="Language"></div>
+                    </div>
+                    <div class="nps"><div id="ref_mbr_address" class="npn" data-field="reference.memberAddress" data-label="Address"></div></div>
+                    <div class="nps"><div id="ref_mbr_phone" data-field="reference.memberPhone" data-label="Phone"></div></div>
+                    <div class="nps">
+                        <div id="ref_prv_id" data-field="reference.providerId" data-label="Provider ID"></div>
+                        <div id="ref_prv_last_name" data-field="reference.providerLastName" data-label="Last Name"></div>
+                        <div id="ref_prv_first_name" data-field="reference.providerFirstName" data-label="First Name"></div>
+                    </div>
+                    <div class="nps">
+                        <div id="ref_prv_tax_id" data-field="reference.providerTaxId" data-label="Tax ID"></div>
+                        <div id="ref_prv_npi" data-field="reference.providerNpi" data-label="NPI"></div>
+                        <div id="ref_prv_full_name" data-field="reference.providerFullName" data-label="Full Name"></div>
+                    </div>
+                    <div class="nps"><div id="ref_prv_address" class="npn" data-field="reference.providerAddress" data-label="Address"></div></div>
+                    <div class="nps"><div id="ref_prv_phone" data-field="reference.providerPhone" data-label="Phone"></div></div>
+                    <div class="nps">
+                        <div id="ref_ven_id" data-field="reference.vendorId" data-label="Vendor ID"></div>
+                        <div id="ref_ven_last_name" data-field="reference.vendorLastName" data-label="Last Name"></div>
+                        <div id="ref_ven_first_name" data-field="reference.vendorFirstName" data-label="First Name"></div>
+                    </div>
+                    <div class="nps">
+                        <div id="ref_ven_tax_id" data-field="reference.vendorTaxId" data-label="Tax ID"></div>
+                        <div id="ref_ven_npi" data-field="reference.vendorNpi" data-label="NPI"></div>
+                        <div id="ref_ven_full_name" data-field="reference.vendorFullName" data-label="Full Name"></div>
+                    </div>
+                    <div class="nps"><div id="ref_ven_address" class="npn" data-field="reference.vendorAddress" data-label="Address"></div></div>
+                    <div class="nps"><div id="ref_ven_phone" data-field="reference.vendorPhone" data-label="Phone"></div></div>
+                    <div class="nps"><div id="ref_other" class="npn" data-field="reference.other" data-label="Other"></div></div>
+                    <div class="nps">
+                        <div id="ref_type" data-field="reference.type" data-label="Type"></div>
+                        <div id="ref_sub_type" data-field="reference.subtype" data-label="Sub Type"></div>
+                        <div id="ref_type_abbr" data-field="reference.subtypeCode" data-label="Sub Type Code"></div>
+                    </div>
+                    <div class="nps"><div id="ref_note" class="npn" data-field="reference.note" data-label="Note"></div></div>
+                </fieldset>
+            </div>
+            <fieldset>
+                <legend>Resolution</legend>
+                <div class="nps">
+                    <div id="res_priority" data-field="resolution.priority" data-label="Priority"></div>
+                    <div id="res_status" data-field="resolution.status" data-label="Status"></div>
+                    <div id="res_result" data-field="resolution.result" data-label="Result"></div>
+                </div>
+                <div class="nps">
+                    <div id="res_action_abbr" data-field="resolution.actionAbbr" data-label="Action Code"></div>
+                    <div id="res_action_code" data-field="resolution.actionCode" data-label="Action"></div>
+                    <div id="res_assign" data-field="resolution.responsiblePerson" data-label="Assigned To"></div>
+                </div>
+                <div class="nps"><div id="res_note" class="npn" data-field="resolution.note" data-label="Note"></div></div>
+            </fieldset>
+        </div>
+    </div>
+</div>

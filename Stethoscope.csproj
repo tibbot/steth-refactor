@@ -37,4 +37,8 @@
     <TypeScriptCompile Include="wwwroot\js\modules\contracts\member-contract.js" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="docs\snips\" />
+  </ItemGroup>
+
 </Project>

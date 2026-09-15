@@ -1,0 +1,64 @@
+<div class="mdl-hdr">Preferences</div>
+<div id="user-pref" class="pref-container">
+    <div class="sng">
+        <fieldset>
+            <legend>Color</legend>
+            <div id="color-pref" class="btn-bar sng clr-bar">
+                <div class="cp-blue">
+                    <input id="cp-blue" name="color-pref-category" type="radio" value="blue" />
+                    <label id="cp-blue-label" for="cp-blue">Blue </label>
+                </div>
+                <div class="cp-darkcyan">
+                    <input id="cp-darkcyan" name="color-pref-category" type="radio" value="darkcyan" />
+                    <label id="cp-darkcyan-label" for="cp-darkcyan">Dark Cyan </label>
+                </div>
+                <div class="cp-darkviolet">
+                    <input id="cp-violet" name="color-pref-category" type="radio" value="violet" />
+                    <label id="cp-violet-label" class="cp-violet" for="cp-violet">Violet </label>
+                </div>
+                <div class="cp-burnt">
+                    <input id="cp-burnt" name="color-pref-category" type="radio" value="burnt" />
+                    <label id="cp-burnt-label" for="cp-burnt">Burnt </label>
+                </div>
+                <div class="cp-goldenrod">
+                    <input id="cp-goldenrod" name="color-pref-category" type="radio" value="goldenrod" />
+                    <label id="cp-goldenrod-label" for="cp-goldenrod">Golden Rod </label>
+                </div>
+                <div class="cp-seagreen">
+                    <input id="cp-seagreen" name="color-pref-category" type="radio" value="seagreen" />
+                    <label id="cp-seagreen-label" for="cp-seagreen">Sea Green </label>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="dbl">
+        <fieldset>
+            <legend>Mode</legend>
+            <div class="btn-bar sng clr-bar">
+                <div class="md-light">
+                    <input id="md-jedi" name="mode-pref" type="radio" value="light" />
+                    <label for="md-jedi">Jedi </label>
+                </div>
+                <div class="md-dark">
+                    <input id="md-sith" name="mode-pref" type="radio" value="dark" />
+                    <label for="md-sith">Sith </label>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="dbl">
+        <fieldset>
+            <legend>Font</legend>
+            <select id="app-font-pref" class="inp">
+                <option></option>
+                <option value="segoe">Segoe UI Light</option>
+                <option value="aptos">Aptos</option>
+                <option value="osans">Open Sans</option>
+            </select>
+        </fieldset>
+    </div>
+</div>
+<div class="button-container">
+    <button id="pref-save-button" class="lbn" type="button">Save</button>
+    <button id="pref-cancel-button" class="lbn" type="button">Cancel</button>
+</div>

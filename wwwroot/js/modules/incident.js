@@ -47,6 +47,8 @@ export class Incident {
 
         this.search = new Search({ snip: this.Snip, searchMap }); 
 
+        this._initReferenceCollectionSystem();
+
         // Categories map for REFERENCE triad
         this.categories = {
             reference: {
@@ -1802,6 +1804,12 @@ export class Incident {
     // Called when Reference ID resolves to a subject (after peek/search)
     async showReferenceCollections({ domain, subjectId }) {
         const D = String(domain || '').toUpperCase();
+
+        console.log('[Incident] showReferenceCollections', {
+            domain,
+            D,
+            subjectId,
+        });
 
         if (D !== 'MEMBER') {
             console.log('[Incident] collection domain not migrated yet', {

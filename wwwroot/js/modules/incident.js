@@ -14,6 +14,8 @@ import * as Core from 'http://localhost/core-service/';
 console.log('Stethoscope Core ID:', Core.CORE_INSTANCE_ID);
 import { Lookup } from './lookup.js';
 import { Search } from './search.js';
+import { createMemberContract } from './contracts/member-contract.js';
+import { getDetailContract } from './contracts/detail-contracts.js';
 
 export class Incident {
     constructor({ snip }) {
@@ -1784,10 +1786,13 @@ export class Incident {
     // 3) Clct + Detl orchestration state
     // -----------------------------------------
     _initReferenceCollectionSystem() {
+        this._rmgr = null;
         this._clct = null;
         this._detl = null;
 
-        // track what the ancestor considers "chosen"
+        this._referenceDomain = null;
+        this._referenceKeyId = null;
+
         this._chosen = {
             artifactType: '',
             artifactId: '',
@@ -1796,43 +1801,51 @@ export class Incident {
 
     // Called when Reference ID resolves to a subject (after peek/search)
     async showReferenceCollections({ domain, subjectId }) {
-        const host = document.querySelector('.clct');  // your simplified markup
-        const detlHost = document.querySelector('.detl'); // sibling in ancestor
-        if (!host || !detlHost) return;
+        const D = String(domain || '').toUpperCase();
 
-        // Build blueprint based on domain
-        const blueprint = this._buildRefBlueprint(domain);
+        if (D !== 'MEMBER') {
+            console.log('[Incident] collection domain not migrated yet', {
+                domain: D,
+                subjectId,
+            });
+            return;
+        }
 
-        // Destroy old clct + detl (new subject => reset everything)
+        const host = document.querySelector('.clct');
+        const detlHost = document.querySelector('.detl');
+
+        if (!host || !detlHost) {
+            console.warn('[Incident] reference collection hosts not found');
+            return;
+        }
+
+        // New reference subject invalidates the previous reference system.
         this._detl?.destroy?.();
         this._detl = null;
 
         this._clct?.destroy?.();
         this._clct = null;
 
-        // Instantiate clct
-        this._clct = new Clct({
-            host,
-            blueprint,
-            //io: this._buildClctIO(), // DI of buildSnip
-            callbacks: {
-                onFocusChanged: (focus) => {
-                    // Selecting a new row clears whatever was "chosen",
-                    // but does NOT build new detl.
-                    if (this._chosen.artifactId) {
-                        this._clearChosenReference(); // updates notepad + internal state
-                    }
-                    // detl remains as-is (your rule).
-                },
+        this._rmgr?.destroy?.();
+        this._rmgr = null;
 
-                onShowDetail: (req) => {
-                    // Only Show Detail destroys + rebuilds detl
-                    this._showDetail(detlHost, req);
-                },
-            },
-        });
+        this._referenceDomain = D;
+        this._referenceKeyId = subjectId;
 
-        await this._clct.build(subjectId);
+        const contract = createMemberContract();
+
+        this._rmgr = new Core.Rmgr(contract);
+        this._rmgr.initialize();
+
+        await this._rmgr.load(subjectId);
+
+        const eligibility =
+            this._rmgr.getView('eligibility');
+
+        console.log(
+            '[Incident] rmgr eligibility',
+            eligibility
+        );
     }
 
     // -----------------------------------------
@@ -2046,7 +2059,12 @@ export class Incident {
 
         this._applySearchSelection(ctx, domain, normalized);
 
-        await this._loadSubjectReferenceDetail(ctx, domain, keyId);
+        if (ctx === 'reference') {
+            await this.showReferenceCollections({
+                domain,
+                subjectId: keyId,
+            });
+        }
 
     }
 
@@ -2183,7 +2201,8 @@ export class Incident {
         const cfg = referenceMap[domain];
         if (!cfg) return;
 
-        // retrieval/rendering next
+        const results = [];
+
         for (const panel of cfg.panels) {
             const payload = {
                 spName: panel.spName,
@@ -2196,16 +2215,16 @@ export class Incident {
                 ],
             };
 
-            const rows = await Core.post('ParameterSQL', payload);
+            const result = await Core.post('ParameterSQL', payload);
+            const rows = Array.isArray(result) ? result : [];
 
-            console.log('[Incident] reference detail', {
-                domain,
-                title: panel.title,
-                panel: panel.panel,
-                tableId: panel.tableId,
+            results.push({
+                ...panel,
                 rows,
             });
         }
+        console.log('[Incident] reference detail', results);
+
     }
 }
 

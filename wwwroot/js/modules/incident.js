@@ -1099,7 +1099,7 @@ export class Incident {
                     provider_provider_tax_id: row.provider_tax_id,
                     provider_npi: row.npi,
                     provider_full_name: row.full_name,
-                    provider_[address]: row.[address],
+                    provider_address: row.address,
                 };
             case 'VENDOR':
                 return {
@@ -2045,6 +2045,9 @@ export class Incident {
         const normalized = this._normalizeSubjectDetail(domain, detail);
 
         this._applySearchSelection(ctx, domain, normalized);
+
+        await this._loadSubjectReferenceDetail(ctx, domain, keyId);
+
     }
 
     async _getSubjectDetail(domain, keyId) {
@@ -2097,6 +2100,112 @@ export class Incident {
         }
 
         return result[0];
+    }
+
+    async _loadSubjectReferenceDetail(ctx, domain, keyId) {
+        if (ctx !== 'reference') return;
+
+        const referenceMap = {
+            MEMBER: {
+                keyName: 'MEMB_KEYID',
+                panels: [
+                    {
+                        spName: 'scp.get_member_eligibility',
+                        tableId: 'eligibility-table',
+                        panel: 1,
+                        title: 'Eligibility',
+                    },
+                    {
+                        spName: 'scp.get_member_authorization',
+                        tableId: 'authorization-table',
+                        panel: 2,
+                        title: 'Authorizations',
+                    },
+                    {
+                        spName: 'scp.get_member_claim',
+                        tableId: 'claim-table',
+                        panel: 3,
+                        title: 'Claims',
+                    },
+                    {
+                        spName: 'scp.get_member_incident',
+                        tableId: 'incident-table',
+                        panel: 4,
+                        title: 'Incidents',
+                    },
+                    {
+                        spName: 'scp.get_member_condition',
+                        tableId: 'condition-table',
+                        panel: 5,
+                        title: 'Conditions',
+                    },
+
+                ],
+            },
+
+            PROVIDER: {
+                keyName: 'PROV_KEYID',
+                panels: [
+                    {
+                        spName: 'scp.get_provider_specialty',
+                        tableId: 'specialty-table',
+                        panel: 1,
+                        title: 'Specialty',
+                    },
+                    {
+                        spName: 'scp.get_provider_location',
+                        tableId: 'location-table',
+                        panel: 2,
+                        title: 'Locations',
+                    },
+                ],
+            },
+
+            VENDOR: {
+                keyName: 'VEN_KEYID',
+                panels: [
+                    {
+                        spName: 'scp.get_vendor_roster',
+                        tableId: 'roster-table',
+                        panel: 1,
+                        title: 'Roster',
+                    },
+                    {
+                        spName: 'scp.get_vendor_address',
+                        tableId: 'address-table',
+                        panel: 2,
+                        title: 'Address',
+                    },
+                ],
+            },
+        };
+
+        const cfg = referenceMap[domain];
+        if (!cfg) return;
+
+        // retrieval/rendering next
+        for (const panel of cfg.panels) {
+            const payload = {
+                spName: panel.spName,
+                parameters: [
+                    {
+                        Key: `@p_${cfg.keyName}`,
+                        Value: keyId,
+                        Type: 'varchar',
+                    },
+                ],
+            };
+
+            const rows = await Core.post('ParameterSQL', payload);
+
+            console.log('[Incident] reference detail', {
+                domain,
+                title: panel.title,
+                panel: panel.panel,
+                tableId: panel.tableId,
+                rows,
+            });
+        }
     }
 }
 

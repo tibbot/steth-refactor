@@ -771,6 +771,11 @@ export class Incident {
         const term = String(input.value ?? '').trim();
         if (!term) return;
 
+        if (domain === 'OTHER') {
+            this.syncNotepadField(input);
+            return;
+        }
+
         const peekResult = await this.search.peek({ term, domain });
 
         if (!peekResult || peekResult.result !== 1 || !peekResult.keyId) {
@@ -1098,11 +1103,15 @@ export class Incident {
                 };
             case 'VENDOR':
                 return {
-                    vendor_vendor_id: row.vendor_id,
                     vendor_vendor_tax_id: row.vendor_tax_id,
                     vendor_npi: row.npi,
                     vendor_full_name: row.full_name,
                     vendor_address: row.address,
+                };
+            case 'HEALTHPLAN':
+                return {
+                    healthplan_code: row.HPCODE,
+                    healthplan_name: row.HPNAME,
                 };
             default:
                 return row;
@@ -1124,6 +1133,7 @@ export class Incident {
                 MEMBER: 'member_id',
                 PROVIDER: 'provider_tax_id', // user-search key
                 VENDOR: 'vendor_id',          // user-search key
+                HEALTHPLAN: 'healthplan_code',
                 OTHER: null,
             };
 
@@ -2050,6 +2060,10 @@ export class Incident {
             VENDOR: {
                 spName: 'scp.get_vendor_detail',
                 keyName: 'VEN_KEYID',
+            },
+            HEALTHPLAN: {
+                spName: 'scp.get_healthplan_detail',
+                keyName: 'HPCODE',
             },
         };
 

@@ -1819,13 +1819,13 @@ export class Incident {
             return;
         }
 
-        const host = document.querySelector('.clct');
-        const detlHost = document.querySelector('.detl');
+        // const host = document.querySelector('.clct');
+        // const detlHost = document.querySelector('.detl');
 
-        if (!host || !detlHost) {
-            console.warn('[Incident] reference collection hosts not found');
-            return;
-        }
+        // if (!host || !detlHost) {
+        //     console.warn('[Incident] reference collection hosts not found');
+        //     return;
+        // }
 
         // New reference subject invalidates the previous reference system.
         this._detl?.destroy?.();
@@ -1848,8 +1848,16 @@ export class Incident {
         await this._rmgr.load(subjectId);
 
         const eligibility = this._rmgr.getView('eligibility');
-
         const eligibilitySet = contract.sets.eligibility;
+
+        const eligibility = this._rmgr.getView('claims');
+        const eligibilitySet = contract.sets.claims;
+
+
+        console.log('[Incident] rmgr claims', claims);
+        console.log('[Incident] first claim', claims.records?.[0]);
+
+
 
         const columns = eligibilitySet.metadata.columns.map(column => column.key);
 
@@ -1862,22 +1870,47 @@ export class Incident {
             }
         );
 
+        const claimColumns = claimsSet.metadata.columns.map(column => column.key);
+
+        const claimsTable = Core.buildRecordTable(
+            claims.records,
+            {
+                id: claimsSet.metadata.tableId,
+                rowId: row => claimsSet.recordId(row),
+                columns: claimColumns,
+            }
+        );
+
         const blueprint = {
             autoHydrate: false,
             activeTabKey: 'eligibility',
 
-            tabs: [{
-                key: 'eligibility',
-                label: 'Eligibility',
-
-                panel: {
-                    kind: 'table',
-                    tableId: eligibilitySet.metadata.tableId,
-                    selectable: true,
-                    sortable: true,
-                    rowCountInTab: true,
+            tabs: [
+                {
+                    key: 'eligibility',
+                    label: 'Eligibility',
+                    panel: {
+                        kind: 'table',
+                        tableId: eligibilitySet.metadata.tableId,
+                        selectable: true,
+                        sortable: true,
+                        rowCountInTab: true,
+                    },
                 },
-            }],
+                {
+                    key: 'claims',
+                    label: 'Claims',
+                    panel: {
+                        kind: 'table',
+                        tableId: claimsSet.metadata.tableId,
+                        selectable: true,
+                        sortable: true,
+                        rowCountInTab: true,
+                    },
+
+                    detail: claimsSet.metadata.detail,
+                },
+            ],
         };
 
         const host = document.querySelector('.clct');
@@ -1902,6 +1935,11 @@ export class Incident {
                         rowId,
                         row,
                     });
+
+                    console.log(
+                        '[Incident] detail request',
+                        this._clct?.getDetailRequest?.()
+                    );
                 },
             },
         });
@@ -1926,9 +1964,25 @@ export class Incident {
             filtered: eligibility.filtered,
         });
 
+        this._clct.updatePanel('claims', {
+            content: claimsTable,
+
+            count: {
+                visible: claims.visibleCount,
+                total: claims.totalCount,
+            },
+
+            status:
+                claims.visibleCount > 0
+                    ? 'ready'
+                    : 'empty',
+
+            filterable: claims.allowFilter,
+            filtered: claims.filtered,
+        });
+
         console.log(
-            '[Incident] rmgr eligibility',
-            eligibility
+            '[Incident] rmgr eligibility', eligibility
         );
     }
 

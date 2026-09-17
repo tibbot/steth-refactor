@@ -26,11 +26,11 @@ const procedures = Object.freeze({
   incidents: 'scp.list_member_incident',
   conditions: 'scp.list_member_condition',
 
-  claimDiagnosisIndex: 'scp.list_member_claim_diagnosis_index',
+  claimDiagnosisIndex: 'scp.list_member_artifact_diagnosis_index',
   claimServiceIndex: 'scp.list_member_claim_service_index',
   claimProviderIndex: 'scp.list_member_claim_provider_index',
 
-  authorizationDiagnosisIndex: 'scp.list_member_auth_diagnosis_index',
+  authorizationDiagnosisIndex: 'scp.list_member_artifact_diagnosis_index',
   authorizationServiceIndex: 'scp.list_member_auth_service_index',
   authorizationProviderIndex: 'scp.list_member_auth_provider_index',
 });
@@ -151,11 +151,13 @@ function createMemberContract() {
         metadata: {
           tableId: 'member-eligibility-table',
           columns: [
+            { key: 'memberId', label: 'Member ID', sortable: true },
             { key: 'healthPlanCode', label: 'Health Plan', sortable: true },
             { key: 'optionCode', label: 'Option', sortable: true },
             { key: 'optionStartDate', label: 'Opt Start', sortable: true, format: 'date' },
             { key: 'optionEndDate', label: 'Opt End', sortable: true, format: 'date' },
             { key: 'eligibilityStatusCode', label: 'Status', sortable: true },
+            { key: 'pcpProviderId', label: 'PCP Provider ID', sortable: true },
             { key: 'pcpProviderName', label: 'Primary Care Physician', sortable: true },
             { key: 'pcpStartDate', label: 'PCP Start', sortable: true, format: 'date' },
             { key: 'pcpEndDate', label: 'PCP End', sortable: true, format: 'date' },
@@ -354,6 +356,7 @@ function createMemberContract() {
           columns: [
             { key: 'AUTHNO', label: 'Auth #', sortable: true },
             { key: 'requestDate', label: 'Request Date', sortable: true, format: 'date' },
+            { key: 'startDate', label: 'Start', sortable: true, format: 'date' },
             { key: 'expirationDate', label: 'Expires', sortable: true, format: 'date' },
             { key: 'requestedByProviderName', label: 'Requested By', sortable: true },
             { key: 'requestedProviderName', label: 'Provider', sortable: true },
@@ -434,8 +437,9 @@ function createMemberContract() {
           columns: [
             { key: 'conditionCode', label: 'Condition', sortable: true },
             { key: 'conditionDescription', label: 'Description', sortable: true },
-            { key: 'startDate', label: 'Start', sortable: true, format: 'date' },
-            { key: 'endDate', label: 'End', sortable: true, format: 'date' },
+            { key: 'conditionFromDate', label: 'Start', sortable: true, format: 'date' },
+            { key: 'conditionToDate', label: 'End', sortable: true, format: 'date' },
+            { key: 'conditionStatus', label: 'Status', sortable: true },
           ],
         },
       },

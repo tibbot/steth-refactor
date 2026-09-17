@@ -15,7 +15,9 @@
 import * as Core from 'http://localhost/core-service/';
 
 const MEMBER_KEY_PARAMETER = '@p_MEMB_KEYID';
-const MEMBER_KEY_TYPE = 'uniqueidentifier';
+// TODO: restore 'uniqueidentifier' when CoreBackend/Razr supports it.
+// const MEMBER_KEY_TYPE = 'uniqueidentifier';
+const MEMBER_KEY_TYPE = 'varchar';
 
 const procedures = Object.freeze({
   eligibility: 'scp.list_member_eligibility',

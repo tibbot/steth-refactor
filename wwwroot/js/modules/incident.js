@@ -1847,8 +1847,84 @@ export class Incident {
 
         await this._rmgr.load(subjectId);
 
-        const eligibility =
-            this._rmgr.getView('eligibility');
+        const eligibility = this._rmgr.getView('eligibility');
+
+        const eligibilitySet = contract.sets.eligibility;
+
+        const columns = eligibilitySet.metadata.columns.map(column => column.key);
+
+        const table = Core.buildRecordTable(
+            eligibility.records,
+            {
+                id: eligibilitySet.metadata.tableId,
+                rowId: row => eligibilitySet.recordId(row),
+                columns,
+            }
+        );
+
+        const blueprint = {
+            autoHydrate: false,
+            activeTabKey: 'eligibility',
+
+            tabs: [{
+                key: 'eligibility',
+                label: 'Eligibility',
+
+                panel: {
+                    kind: 'table',
+                    tableId: eligibilitySet.metadata.tableId,
+                    selectable: true,
+                    sortable: true,
+                    rowCountInTab: true,
+                },
+            }],
+        };
+
+        const host = document.querySelector('.clct');
+
+        if (!host) {
+            console.warn('[Incident] collection host not found');
+            return;
+        }
+
+        this._clct = new Core.Clct({
+            host,
+            blueprint,
+
+            ctx: {
+                subjectId,
+            },
+
+            callbacks: {
+                onFocusChange: ({ tabKey, rowId, row }) => {
+                    console.log('[Incident] collection focus', {
+                        tabKey,
+                        rowId,
+                        row,
+                    });
+                },
+            },
+        });
+
+        await this._clct.build();
+
+
+        this._clct.updatePanel('eligibility', {
+            content: table,
+
+            count: {
+                visible: eligibility.visibleCount,
+                total: eligibility.totalCount,
+            },
+
+            status:
+                eligibility.visibleCount > 0
+                    ? 'ready'
+                    : 'empty',
+
+            filterable: eligibility.allowFilter,
+            filtered: eligibility.filtered,
+        });
 
         console.log(
             '[Incident] rmgr eligibility',

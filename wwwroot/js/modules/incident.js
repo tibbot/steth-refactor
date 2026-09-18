@@ -1929,7 +1929,7 @@ export class Incident {
                     panel: {
                         kind: 'table',
                         tableId: eligibilitySet.metadata.tableId,
-                        selectable: true,
+                        selectable: false,
                         sortable: true,
                         rowCountInTab: true,
                     },
@@ -1976,7 +1976,7 @@ export class Incident {
                     panel: {
                         kind: 'table',
                         tableId: conditionsSet.metadata.tableId,
-                        selectable: true,
+                        selectable: false,
                         sortable: true,
                         rowCountInTab: true,
                     },
@@ -2097,42 +2097,6 @@ export class Incident {
             filterable: conditions.allowFilter,
             filtered: conditions.filtered,
         });
-
-        const authorizationColumns =
-            authorizationsSet.metadata.columns.map(column => column.key);
-
-        const authorizationsTable = Core.buildRecordTable(
-            authorizations.records,
-            {
-                id: authorizationsSet.metadata.tableId,
-                rowId: row => authorizationsSet.recordId(row),
-                columns: authorizationColumns,
-            }
-        );
-
-        const incidentColumns =
-            incidentsSet.metadata.columns.map(column => column.key);
-
-        const incidentsTable = Core.buildRecordTable(
-            incidents.records,
-            {
-                id: incidentsSet.metadata.tableId,
-                rowId: row => incidentsSet.recordId(row),
-                columns: incidentColumns,
-            }
-        );
-
-        const conditionColumns =
-            conditionsSet.metadata.columns.map(column => column.key);
-
-        const conditionsTable = Core.buildRecordTable(
-            conditions.records,
-            {
-                id: conditionsSet.metadata.tableId,
-                rowId: row => conditionsSet.recordId(row),
-                columns: conditionColumns,
-            }
-        );
     }
 
     // -----------------------------------------
@@ -2192,10 +2156,19 @@ export class Incident {
                         })),
                     };
 
-                    return Core.post(
+                    const result = await Core.post(
                         'ParameterSQL',
                         payload
                     );
+
+                    console.log('[Incident] detail retrieval', {
+                        sp,
+                        params,
+                        payload,
+                        result,
+                    });
+
+                    return result;
                 },
             },
 

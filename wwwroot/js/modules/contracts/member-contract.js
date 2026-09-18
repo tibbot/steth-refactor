@@ -418,17 +418,14 @@ function createMemberContract() {
         key: 'conditions',
         label: 'Conditions',
 
-        loadPrimary: async () => [],
+        loadPrimary: memberKeyId =>
+            loadRows(
+                procedures.conditions,
+                memberKeyId,
+            ),
 
 
         recordId: row => String(row.conditionKey ?? ''),
-
-        //   TODO
-        // loadPrimary: memberKeyId =>
-        //       loadRows(
-        //           procedures.conditions,
-        //           memberKeyId,
-        //       ),
 
         allowFilter: false,
 

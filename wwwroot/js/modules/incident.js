@@ -1845,8 +1845,17 @@ export class Incident {
         const eligibility = this._rmgr.getView('eligibility');
         const eligibilitySet = contract.sets.eligibility;
 
+        const authorizations = this._rmgr.getView('authorizations');
+        const authorizationsSet = contract.sets.authorizations;
+
         const claims = this._rmgr.getView('claims');
         const claimsSet = contract.sets.claims;
+
+        const incidents = this._rmgr.getView('incidents');
+        const incidentsSet = contract.sets.incidents;
+
+        const conditions = this._rmgr.getView('conditions');
+        const conditionsSet = contract.sets.conditions;
 
 
         console.log('[Incident] rmgr claims', claims);
@@ -1856,7 +1865,7 @@ export class Incident {
 
         const columns = eligibilitySet.metadata.columns.map(column => column.key);
 
-        const table = Core.buildRecordTable(
+        const eligibilityTable = Core.buildRecordTable(
             eligibility.records,
             {
                 id: eligibilitySet.metadata.tableId,
@@ -1893,6 +1902,18 @@ export class Incident {
                     },
                 },
                 {
+                    key: 'authorizations',
+                    label: 'Authorizations',
+                    panel: {
+                        kind: 'table',
+                        tableId: authorizationsSet.metadata.tableId,
+                        selectable: true,
+                        sortable: true,
+                        rowCountInTab: true,
+                    },
+                    detail: authorizationsSet.metadata.detail,
+                },
+                {
                     key: 'claims',
                     label: 'Claims',
                     panel: {
@@ -1902,8 +1923,30 @@ export class Incident {
                         sortable: true,
                         rowCountInTab: true,
                     },
-
                     detail: claimsSet.metadata.detail,
+                },
+                {
+                    key: 'incidents',
+                    label: 'Incidents',
+                    panel: {
+                        kind: 'table',
+                        tableId: incidentsSet.metadata.tableId,
+                        selectable: true,
+                        sortable: true,
+                        rowCountInTab: true,
+                    },
+                    detail: incidentsSet.metadata.detail,
+                },
+                {
+                    key: 'conditions',
+                    label: 'Conditions',
+                    panel: {
+                        kind: 'table',
+                        tableId: conditionsSet.metadata.tableId,
+                        selectable: true,
+                        sortable: true,
+                        rowCountInTab: true,
+                    },
                 },
             ],
         };
@@ -1947,7 +1990,7 @@ export class Incident {
 
 
         this._clct.updatePanel('eligibility', {
-            content: table,
+            content: eligibilityTable,
 
             count: {
                 visible: eligibility.visibleCount,
@@ -1961,6 +2004,20 @@ export class Incident {
 
             filterable: eligibility.allowFilter,
             filtered: eligibility.filtered,
+        });
+
+        this._clct.updatePanel('authorizations', {
+            content: authorizationsTable,
+            count: {
+                visible: authorizations.visibleCount,
+                total: authorizations.totalCount,
+            },
+            status:
+                authorizations.visibleCount > 0
+                    ? 'ready'
+                    : 'empty',
+            filterable: authorizations.allowFilter,
+            filtered: authorizations.filtered,
         });
 
         this._clct.updatePanel('claims', {
@@ -1980,8 +2037,68 @@ export class Incident {
             filtered: claims.filtered,
         });
 
-        console.log(
-            '[Incident] rmgr eligibility', eligibility
+        this._clct.updatePanel('incidents', {
+            content: incidentsTable,
+            count: {
+                visible: incidents.visibleCount,
+                total: incidents.totalCount,
+            },
+            status:
+                incidents.visibleCount > 0
+                    ? 'ready'
+                    : 'empty',
+            filterable: incidents.allowFilter,
+            filtered: incidents.filtered,
+        });
+
+        this._clct.updatePanel('conditions', {
+            content: conditionsTable,
+            count: {
+                visible: conditions.visibleCount,
+                total: conditions.totalCount,
+            },
+            status:
+                conditions.visibleCount > 0
+                    ? 'ready'
+                    : 'empty',
+            filterable: conditions.allowFilter,
+            filtered: conditions.filtered,
+        });
+
+        const authorizationColumns =
+            authorizationsSet.metadata.columns.map(column => column.key);
+
+        const authorizationsTable = Core.buildRecordTable(
+            authorizations.records,
+            {
+                id: authorizationsSet.metadata.tableId,
+                rowId: row => authorizationsSet.recordId(row),
+                columns: authorizationColumns,
+            }
+        );
+
+        const incidentColumns =
+            incidentsSet.metadata.columns.map(column => column.key);
+
+        const incidentsTable = Core.buildRecordTable(
+            incidents.records,
+            {
+                id: incidentsSet.metadata.tableId,
+                rowId: row => incidentsSet.recordId(row),
+                columns: incidentColumns,
+            }
+        );
+
+        const conditionColumns =
+            conditionsSet.metadata.columns.map(column => column.key);
+
+        const conditionsTable = Core.buildRecordTable(
+            conditions.records,
+            {
+                id: conditionsSet.metadata.tableId,
+                rowId: row => conditionsSet.recordId(row),
+                columns: conditionColumns,
+            }
         );
     }
 

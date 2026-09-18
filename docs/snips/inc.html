@@ -27,7 +27,7 @@
                     <div>
                         <div id="incident-ctc-first-name" data-bind="incident_ctc_first_name" data-label="First Name"></div>
                         <div id="incident-ctc-last-name" data-bind="incident_ctc_last_name" data-label="Last Name"></div>
-                        <div id="incident-ctc-relation" data-bind="incident_ctc_relation" data-label="Relationship"></div>
+                        <div id="incident-ctc-relation" data-bind="incident_ctc_relation" data-label="Relationship" data-format="html"></div>
                     </div>
                     <div>
                         <div id="incident-ctc-phone" data-bind="incident_ctc_phone" data-label="Phone"></div>
@@ -83,8 +83,8 @@
                     <div id="incident-ref-npi" data-bind="incident_ref_npi" data-label="NPI"></div>
                 </div>
                 <div class="artifact-section">
-                    <div id="incident-ref-type" data-bind="incident_ref_type" data-label="Type"></div>
-                    <div id="incident-ref-sub-type" data-bind="incident_ref_sub_type" data-label="Sub Type"></div>
+                    <div id="incident-ref-type" data-bind="incident_ref_type" data-label="Type" data-format="html"></div>
+                    <div id="incident-ref-sub-type" data-bind="incident_ref_sub_type" data-label="Sub Type" data-format="html"></div>
                 </div>
                 <div class="artifact-section">
                     <div id="incident-ref-artifact-type" data-bind="incident_ref_artifact_type" data-label="Reference Type"></div>
@@ -99,12 +99,12 @@
             <fieldset>
                 <legend>Resolution</legend>
                 <div class="artifact-section">
-                    <div id="incident-res-priority" data-bind="incident_res_priority" data-label="Priority"></div>
-                    <div id="incident-res-status" data-bind="incident_res_status" data-label="Status"></div>
-                    <div id="incident-res-action" data-bind="incident_res_action" data-label="Action"></div>
+                    <div id="incident-res-priority" data-bind="incident_res_priority" data-label="Priority" data-format="html"></div>
+                    <div id="incident-res-status" data-bind="incident_res_status" data-label="Status" data-format="html"></div>
+                    <div id="incident-res-action" data-bind="incident_res_action" data-label="Action" data-format="html"></div>
                 </div>
                 <div class="artifact-section">
-                    <div id="incident-res-result" data-bind="incident_res_result" data-label="Result"></div>
+                    <div id="incident-res-result" data-bind="incident_res_result" data-label="Result" data-format="html"></div>
                     <div id="incident-res-assign" data-bind="incident_res_assign" data-label="Assigned To"></div>
                 </div>
             </fieldset>

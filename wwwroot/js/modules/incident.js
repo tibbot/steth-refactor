@@ -1863,14 +1863,25 @@ export class Incident {
 
 
 
-        const columns = eligibilitySet.metadata.columns.map(column => column.key);
+        const eligibilityColumns = eligibilitySet.metadata.columns.map(column => column.key);
 
         const eligibilityTable = Core.buildRecordTable(
             eligibility.records,
             {
                 id: eligibilitySet.metadata.tableId,
                 rowId: row => eligibilitySet.recordId(row),
-                columns,
+                eligibilityColumns,
+            }
+        );
+
+        const authorizationColumns = authorizationsSet.metadata.columns.map(column => column.key);
+
+        const authorizationsTable = Core.buildRecordTable(
+            authorizations.records,
+            {
+                id: authorizationsSet.metadata.tableId,
+                rowId: row => authorizationsSet.recordId(row),
+                authorizationColumns
             }
         );
 
@@ -1882,6 +1893,28 @@ export class Incident {
                 id: claimsSet.metadata.tableId,
                 rowId: row => claimsSet.recordId(row),
                 columns: claimColumns,
+            }
+        );
+
+        const incidentColumns = incidentsSet.metadata.columns.map(column => column.key);
+
+        const incidentsTable = Core.buildRecordTable(
+            incidents.records,
+            {
+                id: incidentsSet.metadata.tableId,
+                rowId: row => incidentsSet.recordId(row),
+                incidentColumns
+            }
+        );
+
+        const conditionColumns = conditionsSet.metadata.columns.map(column => column.key);
+
+        const conditionsTable = Core.buildRecordTable(
+            conditions.records,
+            {
+                id: conditionsSet.metadata.tableId,
+                rowId: row => conditionsSet.recordId(row),
+                conditionColumns
             }
         );
 

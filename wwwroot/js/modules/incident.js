@@ -1819,14 +1819,6 @@ export class Incident {
             return;
         }
 
-        // const host = document.querySelector('.clct');
-        // const detlHost = document.querySelector('.detl');
-
-        // if (!host || !detlHost) {
-        //     console.warn('[Incident] reference collection hosts not found');
-        //     return;
-        // }
-
         // New reference subject invalidates the previous reference system.
         this._detl?.destroy?.();
         this._detl = null;
@@ -1845,13 +1837,27 @@ export class Incident {
         this._rmgr = new Core.Rmgr(contract);
         this._rmgr.initialize();
 
-        await this._rmgr.load(subjectId);
+        try {
+            await this._rmgr.load(subjectId);
+        }
+        catch (error) {
+            console.error('[Incident] Rmgr load failed', error);
+            if (error instanceof AggregateError) {
+                error.errors.forEach((cause, index) => {
+                    console.error(
+                        `[Incident] Rmgr failure ${index + 1}`,
+                        cause
+                    );
+                });
+            }
+            throw error;
+        }
 
         const eligibility = this._rmgr.getView('eligibility');
         const eligibilitySet = contract.sets.eligibility;
 
-        const eligibility = this._rmgr.getView('claims');
-        const eligibilitySet = contract.sets.claims;
+        const claims = this._rmgr.getView('claims');
+        const claimsSet = contract.sets.claims;
 
 
         console.log('[Incident] rmgr claims', claims);

@@ -2240,6 +2240,38 @@ export class Incident {
         const el = document.querySelector(`[data-field="${fieldPath}"]`);
         if (!el) return;
         el.textContent = String(value ?? '').trim();
+
+        this._resolveNotepadLabel(el);
+    }
+
+    _resolveNotepadLabel(el) {
+        const labelFrom = el.dataset.labelFrom;
+        if (!labelFrom) return;
+
+        // Preserve the markup-defined fallback once.
+        if (!el.dataset.defaultLabel) {
+            el.dataset.defaultLabel =
+                el.dataset.label ?? '';
+        }
+
+        const source = document.querySelector(
+            `[data-field="${labelFrom}"]`
+        );
+
+        const sourceValue =
+            source?.textContent?.trim();
+
+        if (!sourceValue) {
+            el.dataset.label =
+                el.dataset.defaultLabel;
+            return;
+        }
+
+        const suffix =
+            el.dataset.labelSuffix ?? '';
+
+        el.dataset.label =
+            `${sourceValue}${suffix}`;
     }
 
     _buildDetlBlueprint(req) {

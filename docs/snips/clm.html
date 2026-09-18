@@ -1,158 +1,157 @@
 <div id="adiv" style="display: block">
-  <div id="art" class="scp-section">
-    <div id="hdr">
-      <div class="button-container">
-        <input id="choose-artifact" class="lbn" type="button" value="Choose" />
-        <input id="clear-artifact" class="lbn" type="button" value="Clear" />
-      </div>
-    </div>
-    <div id="trk">
-      <fieldset>
-        <legend>Tracking</legend>
-        <div class="artifact-section">
-          <div>
-            <div id="claimno"></div>
-            <div id="authno"></div>
-          </div>
-          <div>
-            <div id="phcode"></div>
-            <div id="placesvc"></div>
-          </div>
-          <div>
-            <div id="daterecd"></div>
-            <div id="datefrom"></div>
-            <div id="dateto"></div>
-          </div>
+    <div id="art" class="scp-section">
+        <div id="hdr">
+            <div class="button-container">
+                <div id="detl-actions"></div>
+            </div>
         </div>
-      </fieldset>
-    </div>
-    <div id="bil">
-      <fieldset>
-        <legend>Billing</legend>
-        <div class="artifact-section">
-          <div>
-            <div id="provclaim"></div>
-            <div id="datepaid"></div>
-            <div id="billed"></div>
-          </div>
-          <div>
-            <div id="amountpaid"></div>
-            <div id="coinsurance"></div>
-            <div id="copay"></div>
-            <div id="deductible"></div>
-          </div>
-          <div>
-            <div id="status"></div>
-            <div id="checkno"></div>
-            <div id="payment-bulk-amount"></div>
-          </div>
+        <div id="trk">
+            <fieldset>
+                <legend>Tracking</legend>
+                <div class="artifact-section">
+                    <div>
+                        <div id="claimno" data-field="CLAIMNO" data-label="Claim ID"></div>
+                        <div id="authno" data-field="AUTHNO" data-label="Authorization ID"></div>
+                    </div>
+                    <div>
+                        <div id="phcode" data-field="PHCODE" data-label="P/H"></div>
+                        <div id="placesvc" data-field="PLACESVC" data-label="Place of Service"></div>
+                    </div>
+                    <div>
+                        <div id="daterecd" data-field="DATERECD" data-label="Date Received"></div>
+                        <div id="datefrom" data-field="DATEFROM" data-label="Service From"></div>
+                        <div id="dateto" data-field="DATETO" data-label="Service Thru"></div>
+                    </div>
+                </div>
+            </fieldset>
         </div>
-      </fieldset>
-    </div>
-    <div id="mbr">
-      <fieldset>
-        <legend>Member</legend>
-        <div class="artifact-sub-section">
-          <div id="membid"></div>
+        <div id="bil">
+            <fieldset>
+                <legend>Billing</legend>
+                <div class="artifact-section">
+                    <div>
+                        <div id="provclaim" data-field="PROVCLAIM" data-label="Provider Claim #"></div>
+                        <div id="datepaid" data-field="DATEPAID" data-label="Date Paid"></div>
+                        <div id="billed" data-field="BILLED" data-label="Billed"></div>
+                    </div>
+                    <div>
+                        <div id="amountpaid" data-field="AMOUNTPAID" data-label="Paid"></div>
+                        <div id="coinsurance" data-field="COINSURANCE" data-label="Coinsurance"></div>
+                        <div id="copay" data-field="COPAY" data-label="Copay"></div>
+                        <div id="deductible" data-field="DEDUCTIBLE" data-label="Deductible"></div>
+                    </div>
+                    <div>
+                        <div id="status" data-field="STATUS" data-label="Status"></div>
+                        <div id="checkno" data-field="CHECKNO" data-label="Check #"></div>
+                        <div id="payment-bulk-amount" data-field="payment_bulk_amount" data-label="Check Amount"></div>
+                    </div>
+                </div>
+            </fieldset>
         </div>
-        <div class="artifact-sub-section">
-          <div id="member-full-name"></div>
-          <div id="member-dob"></div>
-          <div id="member-sex"></div>
+        <div id="mbr">
+            <fieldset>
+                <legend>Member</legend>
+                <div class="artifact-sub-section">
+                    <div id="membid" data-field="MEMBID" data-label="Member #"></div>
+                </div>
+                <div class="artifact-sub-section">
+                    <div id="member-full-name" data-field="member_full_name" data-label="Name"></div>
+                    <div id="member-dob" data-field="member_dob" data-label="Date of Birth"></div>
+                    <div id="member-sex" data-field="member_sex" data-label="Sex"></div>
+                </div>
+            </fieldset>
         </div>
-      </fieldset>
-    </div>
-    <div id="eli">
-      <fieldset>
-        <legend>Health Plan</legend>
-        <div class="artifact-sub-section">
-          <div id="hpcode"></div>
-          <div id="opt"></div>
-          <div id="hp-eff-date"></div>
-          <div id="hp-thru-date"></div>
+        <div id="eli">
+            <fieldset>
+                <legend>Health Plan</legend>
+                <div class="artifact-sub-section">
+                    <div id="hpcode" data-field="HPCODE" data-label="Carrier"></div>
+                    <div id="opt" data-field="OPT" data-label="Plan"></div>
+                    <div id="hp-eff-date" data-field="hp_eff_date" data-label="Effective"></div>
+                    <div id="hp-thru-date" data-field="hp_thru_date" data-label="Terminated"></div>
+                </div>
+            </fieldset>
         </div>
-      </fieldset>
-    </div>
-    <div id="pcp">
-      <fieldset>
-        <legend>PCP</legend>
-        <div class="artifact-sub-section">
-          <div id="pcp-full-name"></div>
-          <div id="pcp-npi"></div>
-          <div id="pcp-eff-date"></div>
-          <div id="pcp-thru-date"></div>
+        <div id="pcp">
+            <fieldset>
+                <legend>PCP</legend>
+                <div class="artifact-sub-section">
+                    <div id="pcp-full-name" data-field="pcp_full_name" data-label="Name"></div>
+                    <div id="pcp-npi" data-field="pcp_npi" data-label="NPI"></div>
+                    <div id="pcp-eff-date" data-field="pcp_eff_date" data-label="Effective"></div>
+                    <div id="pcp-thru-date" data-field="pcp_thru_date" data-label="Terminated"></div>
+                </div>
+            </fieldset>
         </div>
-      </fieldset>
-    </div>
-    <div id="dia">
-      <fieldset>
-        <legend>Diagnoses</legend>
-        <div id="dia-div"></div>
-      </fieldset>
-    </div>
-    <div id="prc">
-      <fieldset>
-        <legend>Procedures</legend>
-        <div id="prc-div"></div>
-      </fieldset>
-    </div>
-    <div id="rnd">
-      <fieldset>
-        <legend>Rendering Provider</legend>
-        <div class="artifact-sub-section">
-          <div id="rnd-provider-name"></div>
-          <div id="rnd-provider-code"></div>
-          <div id="rnd-provider-address"></div>
-          <div id="rnd-provider-phone"></div>
-          <div id="rnd-provider-fax"></div>
-          <div id="rnd-specdescr"></div>
-          <div id="rnd-npino"></div>
+        <div id="dia">
+            <fieldset>
+                <legend>Diagnoses</legend>
+                <div id="dia-div"></div>
+            </fieldset>
         </div>
-      </fieldset>
-    </div>
-    <div id="vnd">
-      <fieldset>
-        <legend>Vendor</legend>
-        <div class="artifact-sub-section">
-          <div id="vendornm"></div>
-          <div id="vendorid"></div>
-          <div id="vendor-address"></div>
-          <div id="vendor-phone"></div>
-          <div id="vendor-fax"></div>
-          <div id="vendor-tax-id"></div>
-          <div id="vendor-npi"></div>
+        <div id="prc">
+            <fieldset>
+                <legend>Procedures</legend>
+                <div id="prc-div"></div>
+            </fieldset>
         </div>
-      </fieldset>
+        <div id="rnd">
+            <fieldset>
+                <legend>Rendering Provider</legend>
+                <div class="artifact-sub-section">
+                    <div id="rnd-provider-name" data-field="rnd_provider_name" data-label="Name"></div>
+                    <div id="rnd-provider-code" data-field="rnd_provider_code" data-label="Provider ID"></div>
+                    <div id="rnd-provider-address" data-field="rnd_provider_address" data-label="Address"></div>
+                    <div id="rnd-provider-phone" data-field="rnd_provider_phone" data-label="Phone"></div>
+                    <div id="rnd-provider-fax" data-field="rnd_provider_fax" data-label="Fax"></div>
+                    <div id="rnd-specdescr" data-field="rnd_specdescr" data-label="Specialty"></div>
+                    <div id="rnd-npino" data-field="rnd_NPINO" data-label="NPI"></div>
+                </div>
+            </fieldset>
+        </div>
+        <div id="vnd">
+            <fieldset>
+                <legend>Vendor</legend>
+                <div class="artifact-sub-section">
+                    <div id="vendornm" data-field="VENDORNM" data-label="Name"></div>
+                    <div id="vendorid" data-field="VENDORID" data-label="Vendor ID"></div>
+                    <div id="vendor-address" data-field="vendor_address" data-label="Address"></div>
+                    <div id="vendor-phone" data-field="vendor_phone" data-label="Phone"></div>
+                    <div id="vendor-fax" data-field="vendor_fax" data-label="Fax"></div>
+                    <div id="vendor-tax-id" data-field="vendor_tax_id" data-label="Tax ID"></div>
+                    <div id="vendor-npi" data-field="VENDOR_NPI" data-label="NPI"></div>
+                </div>
+            </fieldset>
+        </div>
+        <div id="cps">
+            <fieldset>
+                <legend>Claim Process Status</legend>
+                <div id="cps-div"></div>
+            </fieldset>
+        </div>
+        <div id="nte">
+            <fieldset>
+                <legend>Notes</legend>
+                <div id="nte-div"></div>
+            </fieldset>
+        </div>
+        <div id="oth">
+            <fieldset>
+                <legend>Referenced in Notes</legend>
+                <div id="oth-div"></div>
+            </fieldset>
+        </div>
+        <div id="inc">
+            <fieldset>
+                <legend>Incidents</legend>
+                <div id="inc-div"></div>
+            </fieldset>
+        </div>
+        <div id="dup">
+            <fieldset>
+                <legend>Duplicates</legend>
+                <div id="dup-div"></div>
+            </fieldset>
+        </div>
     </div>
-    <div id="cps">
-      <fieldset>
-        <legend>Claim Process Status</legend>
-        <div id="cps-div"></div>
-      </fieldset>
-    </div>
-    <div id="nte">
-      <fieldset>
-        <legend>Notes</legend>
-        <div id="nte-div"></div>
-      </fieldset>
-    </div>
-    <div id="oth">
-      <fieldset>
-        <legend>Referenced in Notes</legend>
-        <div id="oth-div"></div>
-      </fieldset>
-    </div>
-    <div id="inc">
-      <fieldset>
-        <legend>Incidents</legend>
-        <div id="inc-div"></div>
-      </fieldset>
-    </div>
-    <div id="dup">
-      <fieldset>
-        <legend>Duplicates</legend>
-        <div id="dup-div"></div>
-      </fieldset>
-    </div>
-  </div>
 </div>

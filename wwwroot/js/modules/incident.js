@@ -769,6 +769,10 @@ export class Incident {
 
         if (!ctx) return;
 
+        if (ctx === 'reference') {
+            this._clearReferenceSystem();
+        }
+
         const domain = this._getActiveDomain(ctx); // must return 'MEMBER'|'PROVIDER'|'VENDOR'
         if (!domain) return;
 
@@ -1005,33 +1009,15 @@ export class Incident {
 
     _clearSectionArtifacts(section) {
         if (section === 'reference') {
-            // Clear search result tables
-            for (let i = 1; i <= 4; i++) {
-                const tbl = document.getElementById(`panel-table-${i}`);
-                if (tbl) tbl.innerHTML = '';
-            }
-
-            // Reset tabs to first
-            const tabs = document.querySelectorAll('.tab');
-            const panels = document.querySelectorAll('.pnl');
-            tabs.forEach((t, i) => t.classList.toggle('active', i === 0));
-            panels.forEach((p, i) => p.classList.toggle('active', i === 0));
-
-            // Reset artifact block
-            const art = document.getElementById('art');
-            const artId = document.getElementById('art-id');
-            const artData = document.getElementById('art-data');
-            if (art) art.classList.remove('expanded');
-            if (artId) artId.innerHTML = '';
-            if (artData) artData.innerHTML = '';
+            this._clearChosenReference();
+            this._clearReferenceSystem();
+            return;
         }
 
         if (section === 'resolution') {
             const actionSelect = document.getElementById('res-action-code');
             if (actionSelect) actionSelect.selectedIndex = 0;
         }
-
-        // contact/customer don’t have extra artifacts beyond their fields/notepad
     }
 
     _clearCategories(sectionNames) {
@@ -1054,6 +1040,9 @@ export class Incident {
             return;
         }
 
+        if (ctx === 'reference') {
+            this._clearReferenceSystem();
+        }
         this.drawSearch(searchType, ctx);
     }
 
@@ -1947,10 +1936,14 @@ export class Incident {
                         this._clct?.getDetailRequest?.()
                     );
                 },
+                onShowDetail: req => {
+                    this._showDetail(req);
+                },
             },
         });
 
         await this._clct.build();
+        host.classList.remove('dnd');
 
 
         this._clct.updatePanel('eligibility', {
@@ -1995,44 +1988,87 @@ export class Incident {
     // -----------------------------------------
     // 4) Detail show/build/destroy
     // -----------------------------------------
-    async _showDetail(detlHost, req) {
-        // Show Detail implies "chosen" is cleared (your rule)
-        if (this._chosen?.artifactId) {
-            this._clearChosenReference();
+    async _showDetail(req) {
+        if (!req?.detail || !req?.rowId) return;
+
+        const host = document.querySelector('.detl');
+
+        if (!host) {
+            console.warn('[Incident] detail host not found');
+            return;
         }
 
-        // Singleton detl
-        if (this._detl?.destroy) this._detl.destroy();
+        this._detl?.destroy?.();
         this._detl = null;
 
-        const bp = this._buildDetlBlueprint(req);
-        const ctx = this._buildDetlContext(req);
-        const io = this._buildDetlIO();
+        const blueprint = {
+            sp: req.detail.sp,
 
-        this._detl = new Detl({
-            host: detlHost,
-            blueprint: bp,
+            params: ctx => [{
+                key: req.detail.idParameter,
+                value: ctx.rowId,
+                type: 'varchar',
+            }],
+
+            contentSnipId: req.detail.snip,
+
+            canChoose: req.detail.canChoose === true,
+            canClose: true,
+            canClearAfterChoose: true,
+        };
+
+        const ctx = {
+            rowId: req.rowId,
+            tabKey: req.tabKey,
+            tabLabel: req.tabLabel,
+        };
+
+        this._detl = new Core.Detl({
+            host,
+            blueprint,
             ctx,
-            io,
+
+            io: {
+                buildSnip: snipId =>
+                    Core.buildSnip(snipId),
+
+                postParam: async (sp, params) => {
+                    const payload = {
+                        spName: sp,
+                        parameters: params.map(param => ({
+                            Key: param.key,
+                            Value: param.value,
+                            Type: param.type || 'varchar',
+                        })),
+                    };
+
+                    return Core.post(
+                        'ParameterSQL',
+                        payload
+                    );
+                },
+            },
+
             callbacks: {
-                onChoose: (choice) => {
-                    // ancestor records choice; detl collapses itself internally
-                    // use clct’s stable identifiers (tabKey/rowId), not req.key
-                    this._setChosenReference(req.tabKey, req.rowId);
+                onChoose: choice => {
+                    console.log(
+                        '[Incident] detail chosen',
+                        choice
+                    );
                 },
+
                 onClear: () => {
-                    // clears choice; detl clears itself; ancestor drops reference
-                    this._clearChosenReference();
-                    this._detl = null;
+                    console.log('[Incident] detail cleared');
                 },
+
                 onClose: () => {
-                    // just closes detl
-                    this._detl = null;
+                    console.log('[Incident] detail closed');
                 },
             },
         });
 
         await this._detl.build();
+        host.classList.remove('dnd');
     }
 
 
@@ -2057,6 +2093,23 @@ export class Incident {
 
         this._setNotepadValue('reference.artifactType', '');
         this._setNotepadValue('reference.artifactId', '');
+    }
+
+    _clearReferenceSystem() {
+        this._detl?.destroy?.();
+        this._detl = null;
+
+        this._clct?.destroy?.();
+        this._clct = null;
+
+        this._rmgr?.destroy?.();
+        this._rmgr = null;
+
+        this._referenceDomain = null;
+        this._referenceKeyId = null;
+
+        document.querySelector('.clct')?.classList.add('dnd');
+        document.querySelector('.detl')?.classList.add('dnd');
     }
 
     _setNotepadValue(fieldPath, value) {

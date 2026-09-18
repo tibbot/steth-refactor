@@ -56,6 +56,7 @@ async function loadRows(spName, memberKeyId) {
 
   const result = await Core.post('ParameterSQL', payload);
 
+  if (result == null || result === '') return [];
   if (Array.isArray(result)) return result;
   if (Array.isArray(result?.rows)) return result.rows;
   if (Array.isArray(result?.recordset)) return result.recordset;

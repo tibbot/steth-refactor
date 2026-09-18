@@ -35,3 +35,4 @@ wwwroot/dist/
 
 # ignore RIP
 rip/
+/appsettings.json

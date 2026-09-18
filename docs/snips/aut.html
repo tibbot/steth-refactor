@@ -9,18 +9,18 @@
             <fieldset>
                 <legend>Tracking</legend>
                 <div class="artifact-section">
-                    <div id="authno" data-field="AUTHNO" data-label="Authorization ID"></div>
+                    <div id="authno" data-bind="AUTHNO" data-label="Authorization ID"></div>
                     <div>
-                        <div id="requested-date-of-service" data-field="requested_date_of_service" data-label="Requested Date"></div>
-                        <div id="received-date" data-field="received_date" data-label="Determination Date"></div>
-                        <div id="date-range" data-field="date_range" data-label="Valid Dates"></div>
-                        <div id="udf-retro-dos" data-field="UDF_retro_dos" data-label="Retro DOS"></div>
+                        <div id="requested-date-of-service" data-bind="requested_date_of_service" data-label="Requested Date"></div>
+                        <div id="received-date" data-bind="received_date" data-label="Determination Date"></div>
+                        <div id="date-range" data-bind="date_range" data-label="Valid Dates"></div>
+                        <div id="udf-retro-dos" data-bind="UDF_retro_dos" data-label="Retro DOS"></div>
                     </div>
                     <div>
-                        <div id="place-of-service" data-field="place_of_service" data-label="Place of Service"></div>
-                        <div id="authorization-class" data-field="authorization_class" data-label="Class"></div>
-                        <div id="authorization-status" data-field="authorization_status" data-label="Status"></div>
-                        <div id="authorization-priority" data-field="authorization_priority" data-label="Priority"></div>
+                        <div id="place-of-service" data-bind="place_of_service" data-label="Place of Service"></div>
+                        <div id="authorization-class" data-bind="authorization_class" data-label="Class"></div>
+                        <div id="authorization-status" data-bind="authorization_status" data-label="Status"></div>
+                        <div id="authorization-priority" data-bind="authorization_priority" data-label="Priority"></div>
                     </div>
                 </div>
             </fieldset>
@@ -35,12 +35,12 @@
             <fieldset>
                 <legend>Member</legend>
                 <div class="artifact-sub-section">
-                    <div id="membid" data-field="MEMBID" data-label="Member #"></div>
+                    <div id="membid" data-bind="MEMBID" data-label="Member #"></div>
                 </div>
                 <div class="artifact-sub-section">
-                    <div id="member-full-name" data-field="member_full_name" data-label="Name"></div>
-                    <div id="member-dob" data-field="member_dob" data-label="Date of Birth"></div>
-                    <div id="member-sex" data-field="member_sex" data-label="Sex"></div>
+                    <div id="member-full-name" data-bind="member_full_name" data-label="Name"></div>
+                    <div id="member-dob" data-bind="member_dob" data-label="Date of Birth"></div>
+                    <div id="member-sex" data-bind="member_sex" data-label="Sex"></div>
                 </div>
             </fieldset>
         </div>
@@ -48,10 +48,10 @@
             <fieldset>
                 <legend>Health Plan</legend>
                 <div class="artifact-sub-section">
-                    <div id="hpcode" data-field="HPCODE" data-label="Carrier"></div>
-                    <div id="opt" data-field="OPT" data-label="Plan"></div>
-                    <div id="hp-eff-date" data-field="hp_eff_date" data-label="Effective"></div>
-                    <div id="hp-thru-date" data-field="hp_thru_date" data-label="Thru"></div>
+                    <div id="hpcode" data-bind="HPCODE" data-label="Carrier"></div>
+                    <div id="opt" data-bind="OPT" data-label="Plan"></div>
+                    <div id="hp-eff-date" data-bind="hp_eff_date" data-label="Effective"></div>
+                    <div id="hp-thru-date" data-bind="hp_thru_date" data-label="Thru"></div>
                 </div>
             </fieldset>
         </div>
@@ -59,10 +59,10 @@
             <fieldset>
                 <legend>PCP</legend>
                 <div class="artifact-sub-section">
-                    <div id="pcp-full-name" data-field="pcp_full_name" data-label="Name"></div>
-                    <div id="pcp-npi" data-field="pcp_npi" data-label="NPI"></div>
-                    <div id="pcp-eff-date" data-field="pcp_eff_date" data-label="Effective"></div>
-                    <div id="pcp-thru-date" data-field="pcp_thru_date" data-label="Thru"></div>
+                    <div id="pcp-full-name" data-bind="pcp_full_name" data-label="Name"></div>
+                    <div id="pcp-npi" data-bind="pcp_npi" data-label="NPI"></div>
+                    <div id="pcp-eff-date" data-bind="pcp_eff_date" data-label="Effective"></div>
+                    <div id="pcp-thru-date" data-bind="pcp_thru_date" data-label="Thru"></div>
                 </div>
             </fieldset>
         </div>
@@ -70,15 +70,15 @@
             <fieldset>
                 <legend>Requested By</legend>
                 <div class="artifact-sub-section">
-                    <div id="req-by-provider-code" data-field="req_by_provider_code" data-label="Provider Id"></div>
+                    <div id="req-by-provider-code" data-bind="req_by_provider_code" data-label="Provider Id"></div>
                 </div>
                 <div class="artifact-sub-section">
-                    <div id="req-by-provider-name" data-field="req_by_provider_name" data-label="Name"></div>
-                    <div id="req-by-provider-address" data-field="req_by_provider_address" data-label="Address"></div>
-                    <div id="req-by-provider-phone" data-field="req_by_provider_phone" data-label="Phone"></div>
-                    <div id="req-by-provider-fax" data-field="req_by_provider_fax" data-label="Fax"></div>
-                    <div id="req-by-speccode" data-field="req_by_speccode" data-label="Specialty"></div>
-                    <div id="req-by-npino" data-field="req_by_NPINO" data-label="NPI"></div>
+                    <div id="req-by-provider-name" data-bind="req_by_provider_name" data-label="Name"></div>
+                    <div id="req-by-provider-address" data-bind="req_by_provider_address" data-label="Address"></div>
+                    <div id="req-by-provider-phone" data-bind="req_by_provider_phone" data-label="Phone"></div>
+                    <div id="req-by-provider-fax" data-bind="req_by_provider_fax" data-label="Fax"></div>
+                    <div id="req-by-speccode" data-bind="req_by_speccode" data-label="Specialty"></div>
+                    <div id="req-by-npino" data-bind="req_by_NPINO" data-label="NPI"></div>
                 </div>
             </fieldset>
         </div>
@@ -86,15 +86,15 @@
             <fieldset>
                 <legend>Referred To</legend>
                 <div class="artifact-sub-section">
-                    <div id="ref-to-provider-code" data-field="ref_to_provider_code" data-label="Provider Id"></div>
+                    <div id="ref-to-provider-code" data-bind="ref_to_provider_code" data-label="Provider Id"></div>
                 </div>
                 <div class="artifact-sub-section">
-                    <div id="ref-to-provider-name" data-field="ref_to_provider_name" data-label="Name"></div>
-                    <div id="ref-to-provider-address" data-field="ref_to_provider_address" data-label="Address"></div>
-                    <div id="ref-to-provider-phone" data-field="ref_to_provider_phone" data-label="Phone"></div>
-                    <div id="ref-to-provider-fax" data-field="ref_to_provider_fax" data-label="Fax"></div>
-                    <div id="ref-to-speccode" data-field="ref_to_speccode" data-label="Specialty"></div>
-                    <div id="ref-to-npino" data-field="ref_to_NPINO" data-label="NPI"></div>
+                    <div id="ref-to-provider-name" data-bind="ref_to_provider_name" data-label="Name"></div>
+                    <div id="ref-to-provider-address" data-bind="ref_to_provider_address" data-label="Address"></div>
+                    <div id="ref-to-provider-phone" data-bind="ref_to_provider_phone" data-label="Phone"></div>
+                    <div id="ref-to-provider-fax" data-bind="ref_to_provider_fax" data-label="Fax"></div>
+                    <div id="ref-to-speccode" data-bind="ref_to_speccode" data-label="Specialty"></div>
+                    <div id="ref-to-npino" data-bind="ref_to_NPINO" data-label="NPI"></div>
                 </div>
             </fieldset>
         </div>
@@ -102,15 +102,15 @@
             <fieldset>
                 <legend>Facility</legend>
                 <div class="artifact-sub-section">
-                    <div id="fac-provider-code" data-field="fac_provider_code" data-label="Provider Id"></div>
+                    <div id="fac-provider-code" data-bind="fac_provider_code" data-label="Provider Id"></div>
                 </div>
                 <div class="artifact-sub-section">
-                    <div id="fac-provider-name" data-field="fac_provider_name" data-label="Name"></div>
-                    <div id="fac-provider-address" data-field="fac_provider_address" data-label="Address"></div>
-                    <div id="fac-provider-phone" data-field="fac_provider_phone" data-label="Phone"></div>
-                    <div id="fac-provider-fax" data-field="fac_provider_fax" data-label="Fax"></div>
-                    <div id="fac-provider-speccode" data-field="fac_provider_speccode" data-label="Specialty"></div>
-                    <div id="fac-npino" data-field="fac_NPINO" data-label="NPI"></div>
+                    <div id="fac-provider-name" data-bind="fac_provider_name" data-label="Name"></div>
+                    <div id="fac-provider-address" data-bind="fac_provider_address" data-label="Address"></div>
+                    <div id="fac-provider-phone" data-bind="fac_provider_phone" data-label="Phone"></div>
+                    <div id="fac-provider-fax" data-bind="fac_provider_fax" data-label="Fax"></div>
+                    <div id="fac-provider-speccode" data-bind="fac_provider_speccode" data-label="Specialty"></div>
+                    <div id="fac-npino" data-bind="fac_NPINO" data-label="NPI"></div>
                 </div>
             </fieldset>
         </div>

@@ -2174,9 +2174,9 @@ export class Incident {
 
             callbacks: {
                 onChoose: choice => {
-                    console.log(
-                        '[Incident] detail chosen',
-                        choice
+                    this._setChosenReference(
+                        req.tabKey,
+                        req.rowId
                     );
                 },
 

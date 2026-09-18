@@ -46,17 +46,17 @@ async function main() {
 
     const Snip = Core.getSnip();
 
-    await Core.authenticateUser();
+    // await Core.authenticateUser();
 
     // authenticate user
-    // const authUser = await Core.authenticateCredential({
-    //     authSp: 'cor.get_user_credential'
-    // });
+    const authUser = await Core.authenticateCredential({
+        authSp: 'cor.get_user_credential'
+    });
 
-    // if (!authUser || authUser.userId <= 0) {
-    //     return;
-    // }
-    // console.log(Snip);
+    if (!authUser || authUser.userId <= 0) {
+        return;
+    }
+    console.log(Snip);
 
     Core.setAppAsset('app-image', '/img/scp.png');
 

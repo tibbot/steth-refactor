@@ -786,13 +786,26 @@ export class Incident {
 
         const peekResult = await this.search.peek({ term, domain });
 
-        if (!peekResult || peekResult.result !== 1 || !peekResult.keyId) {
+        if (!peekResult || peekResult.result !== 1 || !peekResult.selected) {
             input.value = '';
             this.syncNotepadField(input);
             return;
         }
 
-        await this._selectSubject(ctx, domain, peekResult.keyId);
+        const keyId = this.search.getKeyId(
+            domain,
+            peekResult.selected
+        );
+
+        if (!keyId) {
+            console.warn(
+                '[Incident] peek returned a selection without a key:',
+                peekResult.selected
+            );
+            return;
+        }
+
+        await this._selectSubject(ctx, domain, keyId);
 
     }
 
@@ -1870,7 +1883,7 @@ export class Incident {
             {
                 id: eligibilitySet.metadata.tableId,
                 rowId: row => eligibilitySet.recordId(row),
-                eligibilityColumns,
+                columns: eligibilityColumns,
             }
         );
 
@@ -1881,7 +1894,7 @@ export class Incident {
             {
                 id: authorizationsSet.metadata.tableId,
                 rowId: row => authorizationsSet.recordId(row),
-                authorizationColumns
+                columns: authorizationColumns
             }
         );
 
@@ -1903,7 +1916,7 @@ export class Incident {
             {
                 id: incidentsSet.metadata.tableId,
                 rowId: row => incidentsSet.recordId(row),
-                incidentColumns
+                columns: incidentColumns
             }
         );
 
@@ -1914,7 +1927,7 @@ export class Incident {
             {
                 id: conditionsSet.metadata.tableId,
                 rowId: row => conditionsSet.recordId(row),
-                conditionColumns
+                columns: conditionColumns
             }
         );
 
@@ -2112,6 +2125,8 @@ export class Incident {
             return;
         }
 
+        host.classList.add('dnd');
+
         this._detl?.destroy?.();
         this._detl = null;
 
@@ -2181,10 +2196,12 @@ export class Incident {
                 },
 
                 onClear: () => {
+                    host.classList.add('dnd');
                     console.log('[Incident] detail cleared');
                 },
 
                 onClose: () => {
+                    host.classList.add('dnd');
                     console.log('[Incident] detail closed');
                 },
             },
@@ -2270,8 +2287,23 @@ export class Incident {
         const suffix =
             el.dataset.labelSuffix ?? '';
 
+        const prettySource = this._prettyLabelValue(sourceValue);
+
         el.dataset.label =
-            `${sourceValue}${suffix}`;
+            `${prettySource}${suffix}`;
+    }
+
+    _prettyLabelValue(value) {
+        const text = String(value ?? '')
+            .trim()
+            .toLowerCase();
+
+        if (!text) return '';
+
+        return text.replace(
+            /\b\w/g,
+            char => char.toUpperCase()
+        );
     }
 
     _buildDetlBlueprint(req) {

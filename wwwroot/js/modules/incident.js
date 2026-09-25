@@ -2195,9 +2195,101 @@ export class Incident {
         });
 
         await this._detl.build();
+        await this._renderDetailRelated(req);
+
         host.classList.remove('dnd');
     }
 
+    async _renderDetailRelated(req) {
+        const related =
+            this._getDetailRelated(req);
+
+        if (!related.length) return;
+
+        for (const cfg of related) {
+            const target =
+                document.getElementById(cfg.target);
+
+            if (!target) continue;
+
+            const rows = await this._fetchDetailRelated(
+                cfg,
+                req.rowId
+            );
+
+            this._renderDetailRelatedTable(
+                target,
+                cfg,
+                rows
+            );
+        }
+    }
+
+    _getDetailRelated(req) {
+        if (req.tabKey !== 'inc') return [];
+
+        return [
+            {
+                target: 'nte-div',
+                sp: 'scp.get_incident_note',
+                params: (rowId) => [
+                    {
+                        name: '@p_CSINO',
+                        value: rowId
+                    }
+                ],
+                tableId: 'incidentNote-table',
+                empty: 'No notes available.',
+            },
+        ];
+    }
+
+    async _fetchDetailRelated(cfg, rowId) {
+        const payload = {
+            spName: cfg.sp,
+            parameters: cfg.params(rowId).map(p => ({
+                Key: p.name,
+                Value: p.value,
+                Type: p.type || 'varchar',
+            })),
+        };
+
+        const result =
+            await Core.post('ParameterSQL', payload);
+
+        return Array.isArray(result)
+            ? result
+            : (result?.rows || []);
+    }
+
+    _renderDetailRelatedTable(
+        target,
+        cfg,
+        rows
+    ) {
+        target.innerHTML = '';
+
+        if (!rows.length) {
+            target.textContent = cfg.empty;
+            return;
+        }
+
+        const headers = Object.keys(rows[0]);
+
+        const data = rows.map(row =>
+            headers.map(key => row[key] ?? '')
+        );
+
+        const table = Core.buildTable(
+            data,
+            headers,
+            cfg.tableId
+        );
+
+        target.appendChild(table);
+
+        Core.makeTableSortable?.(table);
+    }
 
     // -----------------------------------------
     // 5) Ancestor "chosen" helpers (notepad update)

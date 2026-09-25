@@ -53,6 +53,7 @@ export class Search {
                 pickerSnipId: cfg.pickerSnipId || 'pkr',
                 searchSnipId: cfg.searchSnipId || 'search-dialog',
                 tableId: cfg.tableId || 'search-result-table',
+                peekSearchKey: cfg.peekSearchKey,
             };
         });
     }
@@ -100,7 +101,50 @@ export class Search {
         }
 
         if (keyCount > 1) {
-            return this.search({ domain: cfg.domain });
+            const searchKey = cfg.peekSearchKey;
+
+            if (!searchKey) {
+                return this.search({ domain: cfg.domain });
+            }
+
+            if (!cfg.searchProc) {
+                console.warn(
+                    '[Search] Missing search procedure for',
+                    cfg.domain
+                );
+                return { result: 0 };
+            }
+
+            const rows = await this._callProc(cfg.searchProc, {
+                [searchKey]: trimmed,
+            });
+
+            if (!rows || !rows.length) {
+                return { result: 0 };
+            }
+
+            const selected = await this._presentPicker(cfg, rows, {
+                header: `Choose ${cfg.label}`,
+                allowQueryAgain: true,
+            });
+
+            if (selected === '__query_again__') {
+                return this.search({ domain: cfg.domain });
+            }
+
+            if (!selected) {
+                return { result: 0 };
+            }
+
+            const keyField = Object.keys(selected)[0];
+            const keyId = selected[keyField];
+
+            return {
+                result: 1,
+                rows,
+                selected,
+                keyId,
+            };
         }
 
         return { result: 0 };
@@ -122,7 +166,6 @@ export class Search {
 
         // return { result: 1, rows, selected };
     }
-
 
     // --------------------------------------------------
     // 2. SEARCH: full dialog-based search (msx/psx/vsx/hsx)

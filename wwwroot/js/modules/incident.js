@@ -39,9 +39,9 @@ export class Incident {
         this.lookup = new Lookup({ snip: this.Snip, });
 
         const searchMap = [
-            { domain: 'MEMBER', label: 'Member', peekType: 'member', searchProc: 'scp.get_member_search', searchSnipId: 'msx' },
-            { domain: 'PROVIDER', label: 'Provider', peekType: 'provider', searchProc: 'scp.get_provider_search', searchSnipId: 'psx' },
-            { domain: 'VENDOR', label: 'Vendor', peekType: 'vendor', searchProc: 'scp.get_vendor_search', searchSnipId: 'vsx' },
+            { domain: 'MEMBER', label: 'Member', peekType: 'member', searchProc: 'scp.get_member_search', peekSearchKey: 'member_number', searchSnipId: 'msx' },
+            { domain: 'PROVIDER', label: 'Provider', peekType: 'provider', searchProc: 'scp.get_provider_search', peekSearchKey: 'tax_id', searchSnipId: 'psx' },
+            { domain: 'VENDOR', label: 'Vendor', peekType: 'vendor', searchProc: 'scp.get_vendor_search', peekSearchKey: 'tax_id', searchSnipId: 'vsx' },
             { domain: 'HEALTHPLAN', label: 'Health Plan', peekType: 'healthplan', searchProc: 'scp.get_healthplan_search', searchSnipId: 'hsx' },
         ];
 
@@ -786,26 +786,13 @@ export class Incident {
 
         const peekResult = await this.search.peek({ term, domain });
 
-        if (!peekResult || peekResult.result !== 1 || !peekResult.selected) {
+        if (!peekResult || peekResult.result !== 1 || !peekResult.keyId) {
             input.value = '';
             this.syncNotepadField(input);
             return;
         }
 
-        const keyId = this.search.getKeyId(
-            domain,
-            peekResult.selected
-        );
-
-        if (!keyId) {
-            console.warn(
-                '[Incident] peek returned a selection without a key:',
-                peekResult.selected
-            );
-            return;
-        }
-
-        await this._selectSubject(ctx, domain, keyId);
+        await this._selectSubject(ctx, domain, peekResult.keyId);
 
     }
 
@@ -2299,6 +2286,14 @@ export class Incident {
             .toLowerCase();
 
         if (!text) return '';
+
+        const singular = {
+            claims: 'claim',
+            authorizations: 'authorization',
+            incidents: 'incident',
+        };
+
+        text = singular[text] ?? text;
 
         return text.replace(
             /\b\w/g,

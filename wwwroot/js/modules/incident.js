@@ -2195,56 +2195,33 @@ export class Incident {
         });
 
         await this._detl.build();
-        await this._renderDetailRelated(req);
+        await this._renderRelatedDetail(req);
 
         host.classList.remove('dnd');
     }
 
-    async _renderDetailRelated(req) {
-        const related =
-            this._getDetailRelated(req);
+    _getRelatedDetail(req) {
+        const relatedMap = {
+            inc: [
+                {
+                    target: 'nte-div',
+                    sp: 'scp.get_incident_note',
+                    params: (rowId) => [
+                        {
+                            name: '@p_CSINO',
+                            value: rowId,
+                        },
+                    ],
+                    tableId: 'incidentNote-table',
+                    empty: 'No notes available.',
+                },
+            ],
+        };
 
-        if (!related.length) return;
-
-        for (const cfg of related) {
-            const target =
-                document.getElementById(cfg.target);
-
-            if (!target) continue;
-
-            const rows = await this._fetchDetailRelated(
-                cfg,
-                req.rowId
-            );
-
-            this._renderDetailRelatedTable(
-                target,
-                cfg,
-                rows
-            );
-        }
+        return relatedMap[req.tabKey] || [];
     }
 
-    _getDetailRelated(req) {
-        if (req.tabKey !== 'inc') return [];
-
-        return [
-            {
-                target: 'nte-div',
-                sp: 'scp.get_incident_note',
-                params: (rowId) => [
-                    {
-                        name: '@p_CSINO',
-                        value: rowId
-                    }
-                ],
-                tableId: 'incidentNote-table',
-                empty: 'No notes available.',
-            },
-        ];
-    }
-
-    async _fetchDetailRelated(cfg, rowId) {
+    async _fetchRelatedDetail(cfg, rowId) {
         const payload = {
             spName: cfg.sp,
             parameters: cfg.params(rowId).map(p => ({
@@ -2257,38 +2234,56 @@ export class Incident {
         const result =
             await Core.post('ParameterSQL', payload);
 
-        return Array.isArray(result)
-            ? result
-            : (result?.rows || []);
-    }
-
-    _renderDetailRelatedTable(
-        target,
-        cfg,
-        rows
-    ) {
-        target.innerHTML = '';
-
-        if (!rows.length) {
-            target.textContent = cfg.empty;
-            return;
+        if (Array.isArray(result)) {
+            return result;
         }
 
-        const headers = Object.keys(rows[0]);
+        if (Array.isArray(result?.rows)) {
+            return result.rows;
+        }
 
-        const data = rows.map(row =>
-            headers.map(key => row[key] ?? '')
-        );
+        return [];
+    }
 
-        const table = Core.buildTable(
-            data,
-            headers,
-            cfg.tableId
-        );
+    async _renderRelatedDetail(req) {
+        const related = this._getRelatedDetail(req);
 
-        target.appendChild(table);
+        for (const cfg of related) {
+            const target =
+                document.getElementById(cfg.target);
 
-        Core.makeTableSortable?.(table);
+            if (!target) {
+                console.warn(
+                    '[Incident] Related detail target not found:',
+                    cfg.target
+                );
+                continue;
+            }
+
+            const rows =
+                await this._fetchRelatedDetail(
+                    cfg,
+                    req.rowId
+                );
+
+            target.innerHTML = '';
+
+            if (!rows.length) {
+                target.textContent = cfg.empty;
+                continue;
+            }
+
+            const table = Core.buildRecordTable(
+                rows,
+                {
+                    id: cfg.tableId,
+                }
+            );
+
+            target.appendChild(table);
+
+            Core.makeTableSortable?.(table);
+        }
     }
 
     // -----------------------------------------

@@ -2401,7 +2401,7 @@ export class Incident {
         this._setNotepadValue('reference.artifactType', this._chosen.artifactType);
         this._setNotepadValue('reference.artifactId', this._chosen.artifactId);
 
-        // anything else: update incident model, etc.
+        this.resolveDynamicLabels();
     }
 
     _clearChosenReference() {
@@ -2410,6 +2410,8 @@ export class Incident {
 
         this._setNotepadValue('reference.artifactType', '');
         this._setNotepadValue('reference.artifactId', '');
+
+        this.resolveDynamicLabels();
     }
 
     _clearReferenceSystem() {

@@ -17,6 +17,7 @@ import { Search } from './search.js';
 import { createMemberContract } from './contracts/member-contract.js';
 import { getDetailContract } from './contracts/detail-contracts.js';
 
+
 export class Incident {
     constructor({ snip }) {
         this.Snip = snip;
@@ -1865,7 +1866,7 @@ export class Incident {
 
 
 
-        const eligibilityColumns = eligibilitySet.metadata.columns.map(column => column.key);
+        const eligibilityColumns = eligibilitySet.metadata.columns;
 
         const eligibilityTable = Core.buildRecordTable(
             eligibility.records,
@@ -1875,8 +1876,9 @@ export class Incident {
                 columns: eligibilityColumns,
             }
         );
+        Core.makeTableSortable(eligibilityTable);
 
-        const authorizationColumns = authorizationsSet.metadata.columns.map(column => column.key);
+        const authorizationColumns = authorizationsSet.metadata.columns;
 
         const authorizationsTable = Core.buildRecordTable(
             authorizations.records,
@@ -1886,8 +1888,9 @@ export class Incident {
                 columns: authorizationColumns
             }
         );
+        Core.makeTableSortable(authorizationsTable);
 
-        const claimColumns = claimsSet.metadata.columns.map(column => column.key);
+        const claimColumns = claimsSet.metadata.columns;
 
         const claimsTable = Core.buildRecordTable(
             claims.records,
@@ -1897,8 +1900,9 @@ export class Incident {
                 columns: claimColumns,
             }
         );
+        Core.makeTableSortable(claimsTable);
 
-        const incidentColumns = incidentsSet.metadata.columns.map(column => column.key);
+        const incidentColumns = incidentsSet.metadata.columns;
 
         const incidentsTable = Core.buildRecordTable(
             incidents.records,
@@ -1908,8 +1912,9 @@ export class Incident {
                 columns: incidentColumns
             }
         );
+        Core.makeTableSortable(incidentsTable);
 
-        const conditionColumns = conditionsSet.metadata.columns.map(column => column.key);
+        const conditionColumns = conditionsSet.metadata.columns;
 
         const conditionsTable = Core.buildRecordTable(
             conditions.records,
@@ -1919,6 +1924,7 @@ export class Incident {
                 columns: conditionColumns
             }
         );
+        Core.makeTableSortable(conditionsTable);
 
         const blueprint = {
             autoHydrate: false,
@@ -2210,6 +2216,7 @@ export class Incident {
                     sp: 'scp.get_artifact_diagnosis',
                     params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
                     tableId: 'artifactDiagnosis-table',
+                    columnMap: { '#': { sortType: 'number' } },
                     empty: 'No diagnosis records available.',
                 },
                 {
@@ -2217,6 +2224,7 @@ export class Incident {
                     sp: 'scp.get_claim_procedure',
                     params: (rowId) => [{ name: '@p_CLAIMNO', value: rowId }],
                     tableId: 'claimProcedure-table',
+                    columnMap: { '#': { sortType: 'number' }, Date: { sortType: 'date' }, Quantity: { sortType: 'number' }, Billed: { sortType: 'number' }, Allowed: { sortType: 'number' }, Paid: { sortType: 'number' }, Adj: { format: 'html' }, Note: { format: 'html' } },
                     empty: 'No procedure records available.',
                 },
                 {
@@ -2224,6 +2232,7 @@ export class Incident {
                     sp: 'scp.get_claim_processing_status',
                     params: (rowId) => [{ name: '@p_CLAIMNO', value: rowId }],
                     tableId: 'claimProcessStatus-table',
+                    columnMap: { '#': { sortType: 'number' } },
                     empty: 'No process status records available.',
                 },
                 {
@@ -2231,6 +2240,7 @@ export class Incident {
                     sp: 'scp.get_artifact_note',
                     params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
                     tableId: 'artifactNote-table',
+                    columnMap: { '#': { sortType: 'number' }, Date: { sortType: 'date' } },
                     empty: 'No notes available.',
                 },
                 {
@@ -2238,6 +2248,7 @@ export class Incident {
                     sp: 'scp.get_referenced_artifact',
                     params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
                     tableId: 'referencedArtifact-table',
+                    columnMap: { '#': { sortType: 'number' } },
                     empty: 'No referenced records available.',
                 },
                 {
@@ -2245,6 +2256,7 @@ export class Incident {
                     sp: 'scp.get_related_incident',
                     params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
                     tableId: 'relatedIncident-table',
+                    columnMap: { '#': { sortType: 'number' }, 'Opened Date': { sortType: 'date' }, 'Closed Date': { sortType: 'date' } },
                     empty: 'No related records found.',
                 },
                 {
@@ -2252,6 +2264,7 @@ export class Incident {
                     sp: 'scp.get_claim_duplicate',
                     params: (rowId) => [{ name: '@p_CLAIMNO', value: rowId }],
                     tableId: 'claimDuplicate-table',
+                    columnMap: { '#': { sortType: 'number' }, Status: { format: 'html' }, Received: { sortType: 'date' }, 'Date Paid': { sortType: 'date' }, Billed: { sortType: 'number' }, 'Net Pay': { sortType: 'number' }, 'Primary Dx': { format: 'html' } },
                     empty: 'No duplicates found.',
                 },
             ],
@@ -2261,6 +2274,7 @@ export class Incident {
                     sp: 'scp.get_authorization_inpatient_detail',
                     params: (rowId) => [{ name: '@p_AUTHNO', value: rowId }],
                     tableId: 'inpatientDetail-table',
+                    columnMap: { 'Admit Date': { sortType: 'date' }, 'Discharge Date': { sortType: 'date' }, 'Admit Diagnosis': { format: 'html' }, 'Admission Source': { format: 'html' } },
                     empty: 'No inpatient records found for this authorization.',
                 },
                 {
@@ -2268,6 +2282,7 @@ export class Incident {
                     sp: 'scp.get_artifact_diagnosis',
                     params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
                     tableId: 'artifactDiagnosis-table',
+                    columnMap: { '#': { sortType: 'number' } },
                     empty: 'No diagnosis records available.',
                 },
                 {
@@ -2275,6 +2290,7 @@ export class Incident {
                     sp: 'scp.get_authorization_procedure',
                     params: (rowId) => [{ name: '@p_AUTHNO', value: rowId }],
                     tableId: 'authorizationProcedure-table',
+                    columnMap: { '#': { sortType: 'number' }, Date: { sortType: 'date' }, Quantity: { sortType: 'number' } },
                     empty: 'No procedure records available.',
                 },
                 {
@@ -2282,6 +2298,7 @@ export class Incident {
                     sp: 'scp.get_artifact_note',
                     params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
                     tableId: 'artifactNote-table',
+                    columnMap: { '#': { sortType: 'number' }, Date: { sortType: 'date' } },
                     empty: 'No notes available.',
                 },
                 {
@@ -2289,6 +2306,7 @@ export class Incident {
                     sp: 'scp.get_claim_xref',
                     params: (rowId) => [{ name: '@p_AUTHNO', value: rowId }],
                     tableId: 'claimXref-table',
+                    columnMap: { '#': { sortType: 'number' }, 'Date Received': { sortType: 'date' } },
                     empty: 'Authorization is not referenced in any claims.',
                 },
                 {
@@ -2296,6 +2314,7 @@ export class Incident {
                     sp: 'scp.get_referenced_artifact',
                     params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
                     tableId: 'referencedArtifact-table',
+                    columnMap: { '#': { sortType: 'number' } },
                     empty: 'No referenced records available.',
                 },
                 {
@@ -2303,6 +2322,7 @@ export class Incident {
                     sp: 'scp.get_related_incident',
                     params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
                     tableId: 'relatedIncident-table',
+                    columnMap: { '#': { sortType: 'number' }, 'Opened Date': { sortType: 'date' }, 'Closed Date': { sortType: 'date' } },
                     empty: 'No related records found.',
                 },
             ],
@@ -2317,6 +2337,7 @@ export class Incident {
                         },
                     ],
                     tableId: 'incidentNote-table',
+                    columnMap: { Date: { sortType: 'date' }, Action: { format: 'html' }, Result: { format: 'html' } },
                     empty: 'No notes available.',
                 },
             ],
@@ -2381,12 +2402,19 @@ export class Incident {
                 rows,
                 {
                     id: cfg.tableId,
+                    columns: Object.keys(rows[0]).map(key => ({
+                        key,
+                        label: ({ artifact_id: 'Artifact ID', CLAIMNO: 'Claim ID', AUTHNO: 'Authorization ID', CSINO: 'Incident ID' })[key] ?? key,
+                        sortable: true,
+                        sortType: 'text',
+                        ...cfg.columnMap?.[key],
+                    })),
                 }
             );
 
             target.appendChild(table);
+            Core.makeTableSortable(table);
 
-            Core.makeTableSortable?.(table);
         }
     }
 
@@ -2437,7 +2465,7 @@ export class Incident {
         if (!el) return;
         el.textContent = String(value ?? '').trim();
 
-        this.resolveDynamicLabels();
+        // this.resolveDynamicLabels();
     }
 
     _resolveNotepadLabel(el) {

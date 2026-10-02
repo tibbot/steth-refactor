@@ -924,13 +924,18 @@ export class Incident {
             const sourceInput = document.querySelector(`[name="${sourceKey}"]`)
                 || document.getElementById(sourceKey);
 
+            if (!sourceInput) {
+                this._resolveNotepadLabel(row);
+                return;
+            }
+
             const type = sourceInput?.value?.trim();
             if (!type) {
                 row.removeAttribute('data-label'); // hides label until value exists
                 return;
             }
             const suffix = row.getAttribute('data-label-suffix') || ' ID';
-            row.setAttribute('data-label', `${type}${suffix}`);
+            row.setAttribute('data-label', `${this._prettyLabelValue(type)}${suffix}`);
 
         });
     }
@@ -1172,7 +1177,7 @@ export class Incident {
 
         switch (fmt) {
             case 'date':
-                // placeholder: keep raw for now; plug in your preferred date normalization later
+                // placeholder: keep raw for now
                 return s;
 
             default:
@@ -1745,25 +1750,22 @@ export class Incident {
         return {
             postTable: async (sp, params) => {
                 // TableSQL adapter: YOU own the payload schema.
-                // If you already have a helper, use it here.
                 const payload = {
                     spName: sp,
                     parameters: (params || []).map(p => ({
                         Key: p.name,
                         Value: p.value,
-                        Type: 'varchar', // adjust if you have typing
+                        Type: 'varchar', 
                     })),
                 };
 
-                // Core.post signature in your environment may differ;
-                // swap this call to your exact wrapper.
                 const html = await Core.post('TableSQL', payload);
                 return String(html || '');
             },
 
             buildSnip: (snipId) => Core.buildSnip(snipId),
 
-            // Native helpers you said you want to leverage
+            // Native helpers
             makeTableSortable: (tableId) => Core.makeTableSortable?.(tableId),
             addTrListener: (tableId, evt, handler) => Core.addTrListener?.(tableId, evt, handler),
 
@@ -2202,6 +2204,57 @@ export class Incident {
 
     _getRelatedDetail(req) {
         const relatedMap = {
+            claims: [
+                {
+                    target: 'dia-div',
+                    sp: 'scp.get_artifact_diagnosis',
+                    params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
+                    tableId: 'artifactDiagnosis-table',
+                    empty: 'No diagnosis records available.',
+                },
+                {
+                    target: 'prc-div',
+                    sp: 'scp.get_claim_procedure',
+                    params: (rowId) => [{ name: '@p_CLAIMNO', value: rowId }],
+                    tableId: 'claimProcedure-table',
+                    empty: 'No procedure records available.',
+                },
+                {
+                    target: 'cps-div',
+                    sp: 'scp.get_claim_processing_status',
+                    params: (rowId) => [{ name: '@p_CLAIMNO', value: rowId }],
+                    tableId: 'claimProcessStatus-table',
+                    empty: 'No process status records available.',
+                },
+                {
+                    target: 'nte-div',
+                    sp: 'scp.get_artifact_note',
+                    params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
+                    tableId: 'artifactNote-table',
+                    empty: 'No notes available.',
+                },
+                {
+                    target: 'oth-div',
+                    sp: 'scp.get_referenced_artifact',
+                    params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
+                    tableId: 'referencedArtifact-table',
+                    empty: 'No referenced records available.',
+                },
+                {
+                    target: 'inc-div',
+                    sp: 'scp.get_related_incident',
+                    params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
+                    tableId: 'relatedIncident-table',
+                    empty: 'No related records found.',
+                },
+                {
+                    target: 'dup-div',
+                    sp: 'scp.get_claim_duplicate',
+                    params: (rowId) => [{ name: '@p_CLAIMNO', value: rowId }],
+                    tableId: 'claimDuplicate-table',
+                    empty: 'No duplicates found.',
+                },
+            ],
             authorizations: [
                 {
                     target: 'inp-div',
@@ -2344,7 +2397,6 @@ export class Incident {
         this._chosen.artifactType = String(artifactType || '').toUpperCase();
         this._chosen.artifactId = String(artifactId || '');
 
-        // Update notepad reference fields (your ids may differ)
         // Example: reference_artifact_type, reference_artifact_identifier
         this._setNotepadValue('reference.artifactType', this._chosen.artifactType);
         this._setNotepadValue('reference.artifactId', this._chosen.artifactId);
@@ -2378,12 +2430,12 @@ export class Incident {
     }
 
     _setNotepadValue(fieldPath, value) {
-        // You already have syncNotepadField; this is a generic setter for data-field divs.
+        // generic setter for data-field divs.
         const el = document.querySelector(`[data-field="${fieldPath}"]`);
         if (!el) return;
         el.textContent = String(value ?? '').trim();
 
-        this._resolveNotepadLabel(el);
+        this.resolveDynamicLabels();
     }
 
     _resolveNotepadLabel(el) {
@@ -2419,7 +2471,7 @@ export class Incident {
     }
 
     _prettyLabelValue(value) {
-        const text = String(value ?? '')
+        let text = String(value ?? '')
             .trim()
             .toLowerCase();
 

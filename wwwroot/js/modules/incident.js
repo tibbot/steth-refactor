@@ -2202,7 +2202,58 @@ export class Incident {
 
     _getRelatedDetail(req) {
         const relatedMap = {
-            inc: [
+            authorizations: [
+                {
+                    target: 'inp-div',
+                    sp: 'scp.get_authorization_inpatient_detail',
+                    params: (rowId) => [{ name: '@p_AUTHNO', value: rowId }],
+                    tableId: 'inpatientDetail-table',
+                    empty: 'No inpatient records found for this authorization.',
+                },
+                {
+                    target: 'dia-div',
+                    sp: 'scp.get_artifact_diagnosis',
+                    params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
+                    tableId: 'artifactDiagnosis-table',
+                    empty: 'No diagnosis records available.',
+                },
+                {
+                    target: 'prc-div',
+                    sp: 'scp.get_authorization_procedure',
+                    params: (rowId) => [{ name: '@p_AUTHNO', value: rowId }],
+                    tableId: 'authorizationProcedure-table',
+                    empty: 'No procedure records available.',
+                },
+                {
+                    target: 'nte-div',
+                    sp: 'scp.get_artifact_note',
+                    params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
+                    tableId: 'artifactNote-table',
+                    empty: 'No notes available.',
+                },
+                {
+                    target: 'xrf-div',
+                    sp: 'scp.get_claim_xref',
+                    params: (rowId) => [{ name: '@p_AUTHNO', value: rowId }],
+                    tableId: 'claimXref-table',
+                    empty: 'Authorization is not referenced in any claims.',
+                },
+                {
+                    target: 'oth-div',
+                    sp: 'scp.get_referenced_artifact',
+                    params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
+                    tableId: 'referencedArtifact-table',
+                    empty: 'No referenced records available.',
+                },
+                {
+                    target: 'inc-div',
+                    sp: 'scp.get_related_incident',
+                    params: (rowId) => [{ name: '@p_artifact_id', value: rowId }],
+                    tableId: 'relatedIncident-table',
+                    empty: 'No related records found.',
+                },
+            ],
+            incidents: [
                 {
                     target: 'nte-div',
                     sp: 'scp.get_incident_note',

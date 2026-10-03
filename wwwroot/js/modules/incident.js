@@ -136,8 +136,6 @@ export class Incident {
                 { target: '#customer-id',  type: 'change', handler: (e) => this.peekSubject(e.target) },
                 { target: '#reference-id', type: 'change', handler: (e) => this.peekSubject(e.target) },
 
-                { target: '#res-action-abbr', type: 'change', handler: () => this._syncActionTandem('code') },
-                { target: '#res-action-code', type: 'change', handler: () => this._syncActionTandem('select') },
 
                 // Tabs & actions
                 //{ target: '.tab',           type: 'click',  handler: (e) => this.selectTab(e.target.id) },
@@ -219,18 +217,9 @@ export class Incident {
         }
 
         this._populateLookupSelects();
-        this._populateResolutionUI();
     }
 
     _populateLookupSelects() {
-        // Action: arrAction -> #res-action
-        const actionArr = this.lookupStore.arrAction || [];
-        const actionNames = actionArr.map(row => row[1]); // [code, name]
-
-        if (actionNames.length) {
-            Core.buildSelect('res-action', actionNames, true);
-        }
-
         // Assigned To: arrRespper -> #res-assign
         const assignArr = this.lookupStore.arrRespper || [];
         const assignNames = assignArr.map(row => row[1]);
@@ -290,19 +279,6 @@ export class Incident {
             // static list pattern: first blank option, then (code, description)
             this._populateSelect(typeSel, typeOptions, { includeBlank: true });
         }
-    }
-
-    _populateResolutionUI() {
-        // Populate Action select
-        const actionArr = this.lookupStore.arrAction || [];
-        const actionNames = actionArr.map(row => row[1]); // display text
-
-        if (actionNames.length) {
-            // true = include empty option at top
-            Core.buildSelect('res-action-code', actionNames, true);
-        }
-
-        // Assigned To stays driven by lookup + button; no select to populate here.
     }
 
     _attachListeners() {
@@ -391,6 +367,7 @@ export class Incident {
         }
 
         if (!arr.length) {
+            input.dataset.code = '';
             // No data: just sync input, do not attempt anything
             if (input.id === 'res-status') {
                 this._updateCloseDateFromStatus('');
@@ -907,10 +884,20 @@ export class Incident {
 
         row.textContent = displayValue;
 
+        if (target.id === 'res-action-code') {
+            this._syncActionTandem(target);
+        }
+
 
         this.resolveDynamicLabels();
     }
 
+
+    _syncActionTandem(input) {
+        // Keep the lookup's description and code paired in the notepad.
+        this._setNotepadValue('resolution.actionCode', input.value);
+        this._setNotepadValue('resolution.actionAbbr', input.dataset.code || '');
+    }
 
     resolveDynamicLabels() {
         const npd = document.getElementById('npd');
@@ -2204,9 +2191,23 @@ export class Incident {
         });
 
         await this._detl.build();
+        this._resolveDetailLabels(host);
         await this._renderRelatedDetail(req);
 
         host.classList.remove('dnd');
+    }
+
+    _resolveDetailLabels(host) {
+        host.querySelectorAll('[data-bind][data-label-from]').forEach(field => {
+            const source = Array.from(host.querySelectorAll('[data-bind]'))
+                .find(candidate => candidate.dataset.bind === field.dataset.labelFrom);
+            const category = source?.textContent?.trim();
+            if (!category) return; // Preserve the snippet's initial label.
+
+            const suffix = category.toUpperCase() === 'MEMBER' ? ' Number'
+                : category.toUpperCase() === 'OTHER' ? ' Name' : ' ID';
+            field.dataset.label = `${this._prettyLabelValue(category)}${suffix}`;
+        });
     }
 
     _getRelatedDetail(req) {

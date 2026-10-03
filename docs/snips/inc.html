@@ -42,7 +42,7 @@
                 <legend>Customer</legend>
                 <div class="artifact-section">
                     <div id="customer-category" data-bind="customer_category" data-label="Customer Type"></div>
-                    <div id="incident-cust-id" data-bind="incident_cust_id" data-label="_ref"></div>
+                    <div id="incident-cust-id" data-bind="incident_cust_id" data-label="Customer ID" data-label-from="customer_category"></div>
                     <div id="incident-cust-name" data-bind="incident_cust_name" data-label="Name"></div>
                 </div>
                 <div class="artifact-section">
@@ -67,7 +67,7 @@
                 <legend>Reference</legend>
                 <div class="artifact-section">
                     <div id="reference-category" data-bind="reference_category" data-label="Reference Type"></div>
-                    <div id="incident-ref-id" data-bind="incident_ref_id" data-label="_ref"></div>
+                    <div id="incident-ref-id" data-bind="incident_ref_id" data-label="Reference ID" data-label-from="reference_category"></div>
                     <div id="incident-ref-name" data-bind="incident_ref_name" data-label="Name"></div>
                 </div>
                 <div class="artifact-section">

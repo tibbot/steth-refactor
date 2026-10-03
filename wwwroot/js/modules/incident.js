@@ -2191,6 +2191,7 @@ export class Incident {
                 },
 
                 onClear: () => {
+                    this._clearChosenReference();
                     host.classList.add('dnd');
                     console.log('[Incident] detail cleared');
                 },

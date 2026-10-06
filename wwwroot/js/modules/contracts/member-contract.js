@@ -123,6 +123,7 @@ function createMemberContract() {
   return {
     key: 'member',
     label: 'Member Records',
+    createFilter: args => new Core.Fltr(args),
 
     sets: {
       eligibility: {
@@ -140,6 +141,7 @@ function createMemberContract() {
         filters: {
           dateRange: {
             concept: 'dateRange',
+            label: 'Date Range',
             kind: 'dateRange',
             source: 'primary',
             parentId: row => String(row.eligibilityKey ?? ''),
@@ -198,6 +200,7 @@ function createMemberContract() {
         filters: {
           dateRange: {
             concept: 'dateRange',
+            label: 'Date Range',
             kind: 'dateRange',
             source: 'primary',
             parentId: row => String(row.CLAIMNO ?? ''),
@@ -207,6 +210,7 @@ function createMemberContract() {
           },
           diagnosis: {
             concept: 'diagnosis',
+            label: 'Diagnosis',
             kind: 'multi',
             source: 'diagnoses',
             parentId: row => String(row.CLAIMNO ?? ''),
@@ -217,6 +221,7 @@ function createMemberContract() {
           },
           serviceCode: {
             concept: 'serviceCode',
+            label: 'Service Code',
             kind: 'multi',
             source: 'services',
             parentId: row => String(row.CLAIMNO ?? ''),
@@ -227,6 +232,7 @@ function createMemberContract() {
           },
           provider: {
             concept: 'provider',
+            label: 'Provider',
             kind: 'multi',
             source: 'providers',
             parentId: row => String(row.CLAIMNO ?? ''),
@@ -234,6 +240,7 @@ function createMemberContract() {
            },
            specialty: {
              concept: 'specialty',
+            label: 'Specialty',
              kind: 'multi',
              source: 'primary',
              parentId: row => String(row.CLAIMNO ?? ''),
@@ -302,6 +309,7 @@ function createMemberContract() {
         filters: {
           dateRange: {
             concept: 'dateRange',
+            label: 'Date Range',
             kind: 'dateRange',
             source: 'primary',
             parentId: row => String(row.AUTHNO ?? ''),
@@ -311,6 +319,7 @@ function createMemberContract() {
           },
           diagnosis: {
             concept: 'diagnosis',
+            label: 'Diagnosis',
             kind: 'multi',
             source: 'diagnoses',
             parentId: row => String(row.AUTHNO ?? ''),
@@ -321,6 +330,7 @@ function createMemberContract() {
           },
           serviceCode: {
             concept: 'serviceCode',
+            label: 'Service Code',
             kind: 'multi',
             source: 'services',
             parentId: row => String(row.AUTHNO ?? ''),
@@ -331,6 +341,7 @@ function createMemberContract() {
           },
           provider: {
             concept: 'provider',
+            label: 'Provider',
             kind: 'multi',
             source: 'providers',
             parentId: row => String(row.AUTHNO ?? ''),
@@ -338,6 +349,7 @@ function createMemberContract() {
           },
           specialty: {
             concept: 'specialty',
+            label: 'Specialty',
             kind: 'multi',
             source: 'primary',
             parentId: row => String(row.AUTHNO ?? ''),
@@ -388,6 +400,7 @@ function createMemberContract() {
         filters: {
           dateRange: {
             concept: 'dateRange',
+            label: 'Date Range',
             kind: 'dateRange',
             source: 'primary',
             parentId: row => String(row.CSINO ?? ''),

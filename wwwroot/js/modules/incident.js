@@ -1853,66 +1853,6 @@ export class Incident {
 
 
 
-        const eligibilityColumns = eligibilitySet.metadata.columns;
-
-        const eligibilityTable = Core.buildRecordTable(
-            eligibility.records,
-            {
-                id: eligibilitySet.metadata.tableId,
-                rowId: row => eligibilitySet.recordId(row),
-                columns: eligibilityColumns,
-            }
-        );
-        Core.makeTableSortable(eligibilityTable);
-
-        const authorizationColumns = authorizationsSet.metadata.columns;
-
-        const authorizationsTable = Core.buildRecordTable(
-            authorizations.records,
-            {
-                id: authorizationsSet.metadata.tableId,
-                rowId: row => authorizationsSet.recordId(row),
-                columns: authorizationColumns
-            }
-        );
-        Core.makeTableSortable(authorizationsTable);
-
-        const claimColumns = claimsSet.metadata.columns;
-
-        const claimsTable = Core.buildRecordTable(
-            claims.records,
-            {
-                id: claimsSet.metadata.tableId,
-                rowId: row => claimsSet.recordId(row),
-                columns: claimColumns,
-            }
-        );
-        Core.makeTableSortable(claimsTable);
-
-        const incidentColumns = incidentsSet.metadata.columns;
-
-        const incidentsTable = Core.buildRecordTable(
-            incidents.records,
-            {
-                id: incidentsSet.metadata.tableId,
-                rowId: row => incidentsSet.recordId(row),
-                columns: incidentColumns
-            }
-        );
-        Core.makeTableSortable(incidentsTable);
-
-        const conditionColumns = conditionsSet.metadata.columns;
-
-        const conditionsTable = Core.buildRecordTable(
-            conditions.records,
-            {
-                id: conditionsSet.metadata.tableId,
-                rowId: row => conditionsSet.recordId(row),
-                columns: conditionColumns
-            }
-        );
-        Core.makeTableSortable(conditionsTable);
-
         const blueprint = {
             autoHydrate: false,
             activeTabKey: 'eligibility',
@@ -2010,6 +1950,15 @@ export class Incident {
                 onShowDetail: req => {
                     this._showDetail(req);
                 },
+                onFilter: async ({ tabKey }) => {
+                    try { await this._rmgr?.requestFilter(tabKey); }
+                    catch (error) { await Core.displayAsyncModal(Core.buildSnip('msg'), `Unable to filter: ${error.message}`); }
+                },
+                onClearFilter: ({ tabKey }) => this._rmgr?.clearFilter(tabKey),
+                onViewFilter: async ({ tabKey }) => {
+                    try { await this._rmgr?.viewFilter(tabKey); }
+                    catch (error) { await Core.displayAsyncModal(Core.buildSnip('msg'), `Unable to view filter: ${error.message}`); }
+                },
             },
         });
 
@@ -2017,81 +1966,36 @@ export class Incident {
         host.classList.remove('dnd');
 
 
-        this._clct.updatePanel('eligibility', {
-            content: eligibilityTable,
-
-            count: {
-                visible: eligibility.visibleCount,
-                total: eligibility.totalCount,
-            },
-
-            status:
-                eligibility.visibleCount > 0
-                    ? 'ready'
-                    : 'empty',
-
-            filterable: eligibility.allowFilter,
-            filtered: eligibility.filtered,
+        const manager = this._rmgr;
+        manager.subscribe(({ change }) => {
+            if (this._rmgr === manager && change.reason === 'view-updated') {
+                this._refreshCollectionViews(contract);
+            }
         });
+        this._refreshCollectionViews(contract);
+    }
 
-        this._clct.updatePanel('authorizations', {
-            content: authorizationsTable,
-            count: {
-                visible: authorizations.visibleCount,
-                total: authorizations.totalCount,
-            },
-            status:
-                authorizations.visibleCount > 0
-                    ? 'ready'
-                    : 'empty',
-            filterable: authorizations.allowFilter,
-            filtered: authorizations.filtered,
-        });
-
-        this._clct.updatePanel('claims', {
-            content: claimsTable,
-
-            count: {
-                visible: claims.visibleCount,
-                total: claims.totalCount,
-            },
-
-            status:
-                claims.visibleCount > 0
-                    ? 'ready'
-                    : 'empty',
-
-            filterable: claims.allowFilter,
-            filtered: claims.filtered,
-        });
-
-        this._clct.updatePanel('incidents', {
-            content: incidentsTable,
-            count: {
-                visible: incidents.visibleCount,
-                total: incidents.totalCount,
-            },
-            status:
-                incidents.visibleCount > 0
-                    ? 'ready'
-                    : 'empty',
-            filterable: incidents.allowFilter,
-            filtered: incidents.filtered,
-        });
-
-        this._clct.updatePanel('conditions', {
-            content: conditionsTable,
-            count: {
-                visible: conditions.visibleCount,
-                total: conditions.totalCount,
-            },
-            status:
-                conditions.visibleCount > 0
-                    ? 'ready'
-                    : 'empty',
-            filterable: conditions.allowFilter,
-            filtered: conditions.filtered,
-        });
+    _refreshCollectionViews(contract) {
+        const active = this._rmgr.hasActiveFilter();
+        const filterable = this._rmgr.getFilterableSetKeys().length > 0;
+        for (const view of this._rmgr.getViews()) {
+            const set = contract.sets[view.key];
+            const table = Core.buildRecordTable(view.records, {
+                id: set.metadata.tableId,
+                rowId: set.recordId,
+                columns: set.metadata.columns,
+            });
+            Core.makeTableSortable(table);
+            this._clct.updatePanel(view.key, {
+                content: view.visibleCount ? table : null,
+                count: { visible: view.visibleCount, total: view.totalCount },
+                status: view.visibleCount ? 'ready' : 'empty',
+                filterable,
+                filtered: active,
+                filterText: active ? 'Filter applied to collections.' : '',
+            });
+            if (!view.visibleCount) this._clct.setPanelStatus(view.key, 'empty');
+        }
     }
 
     // -----------------------------------------

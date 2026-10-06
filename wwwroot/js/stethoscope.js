@@ -1,9 +1,8 @@
 // @ts-nocheck
 import * as Core from 'http://localhost/core-service/';
-console.log('Stethoscope Core ID:', Core.CORE_INSTANCE_ID);
+
 import { Incident } from './modules/incident.js';
 import { Statistics } from './modules/statistics.js';
-
 
 // Core configuration for UI setup and listener mapping
 const coreConfig = {
@@ -34,7 +33,6 @@ const coreConfig = {
   }
 };
 
-
 async function main() {
 
     // Inject UI structure and styles
@@ -42,8 +40,6 @@ async function main() {
     Core.initPreferences();
     // Singleton Snip handle
     await Core.buildInterface(coreConfig);
-
-
 
     const Snip = Core.getSnip();
 
@@ -57,7 +53,6 @@ async function main() {
     if (!authUser || authUser.userId <= 0) {
         return;
     }
-    console.log(Snip);
 
     Core.setAppAsset('app-image', '/img/scp.png');
 
@@ -84,7 +79,6 @@ async function main() {
             }
         }
     });
-
 
     (async () => {
         const incident = new Incident({ snip: Snip });

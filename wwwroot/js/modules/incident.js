@@ -8,18 +8,14 @@
  * © 2025 tibbot, inc. all rights reserved
  */
 
-
-
 import * as Core from 'http://localhost/core-service/';
-console.log('Stethoscope Core ID:', Core.CORE_INSTANCE_ID);
+
 import { Lookup } from './lookup.js';
 import { Search } from './search.js';
 import { createMemberContract } from './contracts/member-contract.js';
 import { createProviderContract } from './contracts/provider-contract.js';
 import { createVendorContract } from './contracts/vendor-contract.js';
-import { getDetailContract } from './contracts/detail-contracts.js';
 import { IncidentPersistence } from './contracts/persistence-contract.js';
-
 
 export class Incident {
     constructor({ snip }) {
@@ -30,7 +26,6 @@ export class Incident {
         this._persistedIncidentId = null;
         this.csmUserId = null;
         this._contactGeneration = 0;
-        console.log(this.agentId);
 
         // Minimal state (no shadow object)
         this.incidentId = null; // == csino
@@ -119,8 +114,6 @@ export class Incident {
             listeners: [
                 // Contact
 
-                //{ target: '#ctc-rel', type: 'change', handler: (e) => this.onRelationshipChange(e) },
-
                 { target: '#ctc-ph', type: 'input', handler: (e) => this._formatPhone(e, 'e') }, // harmless convenience
                 { target: '#ctc-fx', type: 'input', handler: (e) => this._formatPhone(e) },
 
@@ -136,21 +129,15 @@ export class Incident {
                 // Search and dropdowns
                 { target: '#customer-search', type: 'click', handler: () => this.onSearchClick('customer') },
                 { target: '#reference-search', type: 'click', handler: () => this.onSearchClick('reference') },
-                //{ target: '.sbn', type: 'click', handler: (e) => this.setDropDown(e.target) },
-                //{ target: '.ibn', type: 'click', handler: (e) => this.setSearch(e.target) },
 
                 // Artifact toggles & peeks
-                //{ target: '.art-icon',     type: 'click',  handler: (e) => this.toggleArtifact(e) },
                 { target: '#customer-id',  type: 'change', handler: (e) => this.peekSubject(e.target) },
                 { target: '#reference-id', type: 'change', handler: (e) => this.peekSubject(e.target) },
 
-
                 // Tabs & actions
-                //{ target: '.tab',           type: 'click',  handler: (e) => this.selectTab(e.target.id) },
                 { target: '#reset-btn', type: 'click', handler: (e) => this.confirmClearAll(e) },
                 { target: '#save-more-btn', type: 'click', handler: (e) => this.saveAndMore(e) },
                 { target: '#save-new-btn', type: 'click', handler: (e) => this.saveAndNew(e) },
-                //{ target: '#res-status',    type: 'change', handler: (e) => this.closeIncident(e.target.id) },
 
                 // REFERENCE ONLY triad
                 { target: '#ref-type',    type: 'change', handler: (e) => this.onTypeChange(e) },
@@ -310,10 +297,8 @@ export class Incident {
         });
 
         Core.attachEventListeners(configs);
-        // to detach later
-        this._boundListeners = configs;
-    }
 
+    }
 
     detachListeners() {
         for (const { type, bound } of this._delegated) document.removeEventListener(type, bound);
@@ -458,7 +443,6 @@ export class Incident {
         container.addEventListener('change', handler);
     }
 
-
     _updateCloseDateFromStatus(statusName) {
         const npd = document.getElementById('npd');
         if (!npd) return;
@@ -479,13 +463,10 @@ export class Incident {
         this.resolveDynamicLabels();
     }
 
-
     _formatPhone(e, mode) {
         const input = e.target; if (!input) return;
         input.value = Core.prettyTel(input.value, mode === 'e' ? 'e' : undefined);
     }
-
-    // Inside export class Incident { ... }
 
     toggleNotepad(_e) {
         const wrap = document.querySelector('.wrap');
@@ -519,7 +500,6 @@ export class Incident {
         //icon.innerHTML = wasHidden ? '&rarr;' : '& #x1F5D2;& #xFE0F;';        // → vs 🗒️
         //icon.title = wasHidden ? 'Hide the Notepad' : 'Show the Notepad';
     }
-
 
     onCategoryChange(e, ctx) {
         this.isDirty = true;
@@ -642,7 +622,6 @@ export class Incident {
         // Any other ctx: no-op for now
     }
 
-
     _resolveSameReference() {
         const customerCatRadio = document.querySelector(
             'input[name="customer.category"]:checked'
@@ -699,20 +678,6 @@ export class Incident {
         return false;
     }
 
-
-    setDropDown(target) {
-        if (Core.toggleDropdown) Core.toggleDropdown(target);
-    }
-
-    //setSearch(target) {
-    //    // Determine panel context from the clicked button (customer|reference)
-    //    const ctx = target.closest?.('#customer-panel') ? 'customer' : target.closest?.('#reference-panel') ? 'reference' : 'customer';
-    //    // Read selected category from the appropriate button bar
-    //    const radio = document.querySelector(`input[name="${ctx}-category"]:checked`);
-    //    const category = radio?.value || 'member';
-    //    Core.openSearchWindow?.({ ctx, category, source: target });
-    //}
-
     toggleArtifact(_e) {
         document.body.classList.toggle('artifact-open');
     }
@@ -728,7 +693,6 @@ export class Incident {
         const checked = container.querySelector('input[type="radio"]:checked');
         return checked ? checked.value : null; // 'MEMBER' | 'PROVIDER' | 'VENDOR'
     }
-
 
     // peekSubject
     async peekSubject(input) {
@@ -767,7 +731,6 @@ export class Incident {
         await this._selectSubject(ctx, domain, peekResult.keyId);
 
     }
-
 
     //selectTab(tabId) {
     //    const tabs = document.querySelectorAll('.tab');
@@ -835,8 +798,6 @@ export class Incident {
             this._saveInProgress = false;
         }
     }
-
-    async closeIncident(_id) { return this.save(); }
 
     // ————————————————————————————————————————————
     // Sync & Utilities
@@ -907,10 +868,8 @@ export class Incident {
             this._syncActionTandem(target);
         }
 
-
         this.resolveDynamicLabels();
     }
-
 
     _syncActionTandem(input) {
         // Keep the lookup's description and code paired in the notepad.
@@ -946,7 +905,6 @@ export class Incident {
 
         });
     }
-
 
     collect() {
         return this.persistence.collect(document, {
@@ -1226,7 +1184,6 @@ export class Incident {
         }
     }
 
-
     _clearForm() {
         this._contactGeneration++;
         this._contactPromise = null;
@@ -1280,14 +1237,13 @@ export class Incident {
         });
     }
 
-
     _syncHeader() {
         if (this.agentId) Core.updateNotepad(this.agentId, 'Agent');
     }
 
     async _fetchCsiNo(generation = this._contactGeneration) {
         try {
-            
+
             const username = this.agentId || '';
 
             if (!username) {
@@ -1318,7 +1274,7 @@ export class Incident {
 
             const incidentNumber = document.getElementById('incident_number');
             if (incidentNumber) incidentNumber.textContent = this.incidentId;
-            
+
             Core.info?.('[incident] New CSINO generated', { csino: this.incidentId });
             return this.incidentId;
         } catch (err) {
@@ -1407,23 +1363,6 @@ export class Incident {
             if (this._contactPromise === pending) this._contactPromise = null;
         }
     }
-
-
-    async _ensureTimer() {
-        if (this._timerStarted) return;
-        this._timerStarted = true;
-
-        // Initialize incident (CSINO, open date, 0:00:00, assigned user)
-        await this._initiateContact();
-
-        // If _initiateContact didn’t set timerStart, set it now
-        if (!this.timerStart) {
-            this.timerStart = Date.now();
-        }
-
-        this.timerHandle = setInterval(() => this._tick(), 1000);
-    }
-
 
     _tick() {
         const elapsed = Date.now() - (this.timerStart || Date.now());
@@ -1515,7 +1454,6 @@ export class Incident {
         this.syncNotepadField(subSel);
         this.syncNotepadField(codeInp);
     }
-
 
     onSubtypeChange(_e) {
         this.isDirty = true;
@@ -1686,131 +1624,12 @@ export class Incident {
         }
     }
 
-    // incident is ancestor for collection and detail
-
-    // -----------------------------------------
-    // 1) Blueprint factory (domain-aware)
-    // -----------------------------------------
-    _buildRefBlueprint(domain) {
-        const D = String(domain || '').toUpperCase();
-
-        if (D === 'MEMBER') {
-            return {
-                tabs: [
-                    {
-                        key: 'elig',
-                        label: 'Eligibility',
-                        panel: {
-                            kind: 'table',
-                            sp: 'scp.get_member_eligibility',
-                            params: (mbrId) => [{ name: '@p_mbrno', value: mbrId }],
-                            rowCountInTab: true,
-                            selectable: false,
-                            sortable: true,
-                        },
-                        // no detail
-                    },
-                    {
-                        key: 'auth',
-                        label: 'Authorizations',
-                        panel: {
-                            kind: 'table',
-                            sp: 'scp.get_member_authorization',
-                            params: (mbrId) => [{ name: '@p_mbrno', value: mbrId }],
-                            rowCountInTab: true,
-                            selectable: true,
-                            sortable: true,
-                        },
-                        detail: {
-                            sp: 'scp.get_auth_detail',
-                            params: (authNo) => [{ name: '@p_authno', value: authNo }],
-                            snip: 'aut',
-                            canChoose: true,
-                        },
-                    },
-                    {
-                        key: 'claim',
-                        label: 'Claims',
-                        panel: {
-                            kind: 'table',
-                            sp: 'scp.get_member_claim',
-                            params: (mbrId) => [{ name: '@p_mbrno', value: mbrId }],
-                            rowCountInTab: true,
-                            selectable: true,
-                            sortable: true,
-                        },
-                        detail: {
-                            sp: 'scp.get_claim_detail',
-                            params: (claimNo) => [{ name: '@p_claimno', value: claimNo }],
-                            snip: 'clm',
-                            canChoose: true,
-                        },
-                    },
-                    {
-                        key: 'inc',
-                        label: 'Incidents',
-                        panel: {
-                            kind: 'table',
-                            sp: 'scp.get_member_incident',
-                            params: (mbrId) => [{ name: '@p_mbrno', value: mbrId }],
-                            rowCountInTab: true,
-                            selectable: true,
-                            sortable: true,
-                        },
-                        detail: {
-                            sp: 'scp.get_inc_detail',
-                            params: (csiNo) => [{ name: '@p_csino', value: csiNo }],
-                            snip: 'inc',
-                            canChoose: false, 
-                        },
-                    },
-                ],
-            };
-        }
-
-        // TODO: PROVIDER/VENDOR variants
-        return { tabs: [] };
-    }
-
-    // -----------------------------------------
-    // 2) DI: TableSQL + helpers (Core boundary)
-    // -----------------------------------------
-    _buildClctIO() {
-        return {
-            postTable: async (sp, params) => {
-                // TableSQL adapter: YOU own the payload schema.
-                const payload = {
-                    spName: sp,
-                    parameters: (params || []).map(p => ({
-                        Key: p.name,
-                        Value: p.value,
-                        Type: 'varchar', 
-                    })),
-                };
-
-                const html = await Core.post('TableSQL', payload);
-                return String(html || '');
-            },
-
-            buildSnip: (snipId) => Core.buildSnip(snipId),
-
-            // Native helpers
-            makeTableSortable: (tableId) => Core.makeTableSortable?.(tableId),
-            addTrListener: (tableId, evt, handler) => Core.addTrListener?.(tableId, evt, handler),
-
-            // row highlight + row count (if present); otherwise clct skeleton fallback handles it
-            highlightRow: (tableId, row) => Core.highlightTableRow?.(tableId, row),
-            getTableRowCount: (tableId) => Core.getTableRowCount?.(tableId),
-        };
-    }
-
-    // -----------------------------------------
-    // 3) Clct + Detl orchestration state
-    // -----------------------------------------
+    // Collection and detail orchestration.
     _initReferenceCollectionSystem() {
         this._rmgr = null;
         this._clct = null;
         this._detl = null;
+        this._detailGeneration = 0;
 
         this._referenceDomain = null;
         this._referenceKeyId = null;
@@ -1825,12 +1644,6 @@ export class Incident {
     async showReferenceCollections({ domain, subjectId }) {
         const D = String(domain || '').toUpperCase();
 
-        console.log('[Incident] showReferenceCollections', {
-            domain,
-            D,
-            subjectId,
-        });
-
         const factory = { MEMBER: createMemberContract, PROVIDER: createProviderContract, VENDOR: createVendorContract }[D];
         if (!factory) {
             this._clearReferenceSystem();
@@ -1838,6 +1651,7 @@ export class Incident {
         }
 
         // New reference subject invalidates the previous reference system.
+        this._detailGeneration++;
         this._detl?.destroy?.();
         this._detl = null;
 
@@ -1909,16 +1723,7 @@ export class Incident {
 
             callbacks: {
                 onFocusChange: ({ tabKey, rowId, row }) => {
-                    console.log('[Incident] collection focus', {
-                        tabKey,
-                        rowId,
-                        row,
-                    });
 
-                    console.log(
-                        '[Incident] detail request',
-                        this._clct?.getDetailRequest?.()
-                    );
                 },
                 onShowDetail: req => {
                     this._showDetail(req);
@@ -1939,7 +1744,6 @@ export class Incident {
         await collection.build();
         if (this._rmgr !== manager || this._clct !== collection) return;
         host.classList.remove('dnd');
-
 
         manager.subscribe(({ change }) => {
             if (this._rmgr === manager && change.reason === 'view-updated') {
@@ -1976,103 +1780,81 @@ export class Incident {
     // 4) Detail show/build/destroy
     // -----------------------------------------
     async _showDetail(req) {
-        if (!req?.detail || !req?.rowId) return;
-
+        if (!req?.detail || !req?.rowId) return false;
         const host = document.querySelector('.detl');
-
-        if (!host) {
-            console.warn('[Incident] detail host not found');
-            return;
-        }
-
-        host.classList.add('dnd');
-
+        if (!host) return false;
+        const generation = ++this._detailGeneration;
         this._detl?.destroy?.();
         this._detl = null;
-
-        const blueprint = {
-            sp: req.detail.sp,
-
-            params: ctx => [{
-                key: req.detail.idParameter,
-                value: ctx.rowId,
-                type: 'varchar',
-            }],
-
-            contentSnipId: req.detail.snip,
-
-            canChoose: req.detail.canChoose === true,
-            canClose: true,
-            canClearAfterChoose: true,
+        host.classList.add('dnd');
+        // Core can finish an asynchronous build after replacement. Give each
+        // request its own detached shell so it cannot overwrite the live view.
+        const shell = host.cloneNode(false);
+        shell.innerHTML = '<div class="detl__hdr"><span class="detl__icon"></span></div><div class="detl__data"></div>';
+        let view;
+        const current = () => generation === this._detailGeneration && this._detl === view;
+        const hide = clear => {
+            if (!current()) return;
+            this._detailGeneration++;
+            if (clear) this._clearChosenReference();
+            shell.classList.add('dnd');
+            view.destroy(); this._detl = null;
         };
-
-        const ctx = {
-            rowId: req.rowId,
-            tabKey: req.tabKey,
-            tabLabel: req.tabLabel,
-        };
-
-        this._detl = new Core.Detl({
-            host,
-            blueprint,
-            ctx,
-
+        view = new Core.Detl({
+            host: shell,
+            blueprint: {
+                sp: req.detail.sp,
+                params: ctx => [{ key: req.detail.idParameter, value: ctx.rowId, type: 'varchar' }],
+                contentSnipId: req.detail.snip,
+                canChoose: req.detail.canChoose === true,
+                canClose: true,
+                canClearAfterChoose: true,
+            },
+            ctx: { rowId: req.rowId, tabKey: req.tabKey, tabLabel: req.tabLabel },
             io: {
-                buildSnip: snipId =>
-                    Core.buildSnip(snipId),
-
+                buildSnip: id => {
+                    const snippet = Core.buildSnip(id);
+                    if (!snippet?.querySelector('[data-bind]')) throw new Error('The detail layout is unavailable.');
+                    return snippet;
+                },
                 postParam: async (sp, params) => {
-                    const payload = {
-                        spName: sp,
-                        parameters: params.map(param => ({
-                            Key: param.key,
-                            Value: param.value,
-                            Type: param.type || 'varchar',
-                        })),
-                    };
-
-                    const result = await Core.post(
-                        'ParameterSQL',
-                        payload
-                    );
-
-                    console.log('[Incident] detail retrieval', {
-                        sp,
-                        params,
-                        payload,
-                        result,
+                    const result = await Core.post('ParameterSQL', { spName: sp,
+                        parameters: params.map(param => ({ Key: param.key, Value: param.value, Type: param.type || 'varchar' })),
                     });
-
-                    return result;
+                    const row = Array.isArray(result) ? result[0] : result?.rows?.[0] || result?.recordset?.[0] || result;
+                    const key = { claims: 'CLAIMNO', authorizations: 'AUTHNO', incidents: 'CSINO' }[req.tabKey];
+                    if (!row || !key || String(row[key]) !== String(req.rowId)) throw new Error('The detail response does not match the selected record.');
+                    return [row];
                 },
             },
-
             callbacks: {
-                onChoose: choice => {
-                    this._setChosenReference(
-                        req.tabKey,
-                        req.rowId
-                    );
-                },
-
-                onClear: () => {
-                    this._clearChosenReference();
-                    host.classList.add('dnd');
-                    console.log('[Incident] detail cleared');
-                },
-
-                onClose: () => {
-                    host.classList.add('dnd');
-                    console.log('[Incident] detail closed');
-                },
+                onChoose: () => { if (current()) this._setChosenReference(req.tabKey, req.rowId); },
+                onClear: () => hide(true),
+                onClose: () => hide(false),
             },
         });
-
-        await this._detl.build();
-        this._resolveDetailLabels(host);
-        await this._renderRelatedDetail(req);
-
-        host.classList.remove('dnd');
+        this._detl = view;
+        try {
+            await view.build();
+            if (!current()) { view.destroy(); return false; }
+            this._resolveDetailLabels(shell);
+            await this._renderRelatedDetail(req, shell, current);
+            if (!current()) { view.destroy(); return false; }
+            shell.classList.remove('dnd');
+            host.replaceWith(shell);
+            return true;
+        } catch (error) {
+            view.destroy();
+            if (generation !== this._detailGeneration) return false;
+            this._detl = null;
+            host.replaceChildren(); host.classList.remove('dnd');
+            const message = document.createElement('p'); message.setAttribute('role', 'alert');
+            message.textContent = 'Unable to load detail. ' + error.message;
+            const retry = document.createElement('button'); retry.type = 'button'; retry.className = 'lbn'; retry.textContent = 'Retry';
+            retry.onclick = () => { if (generation === this._detailGeneration) void this._showDetail(req); };
+            host.append(message, retry);
+            return false;
+        }
     }
 
     _resolveDetailLabels(host) {
@@ -2250,12 +2032,13 @@ export class Incident {
         return [];
     }
 
-    async _renderRelatedDetail(req) {
+    async _renderRelatedDetail(req, root = document, current = () => true) {
         const related = this._getRelatedDetail(req);
 
         for (const cfg of related) {
+            if (!current()) return;
             const target =
-                document.getElementById(cfg.target);
+                root.querySelector('[id="' + cfg.target + '"]');
 
             if (!target) {
                 console.warn(
@@ -2271,6 +2054,7 @@ export class Incident {
                     req.rowId
                 );
 
+            if (!current()) return;
             target.innerHTML = '';
 
             if (!rows.length) {
@@ -2326,6 +2110,7 @@ export class Incident {
     }
 
     _clearReferenceSystem() {
+        this._detailGeneration++;
         this._detl?.destroy?.();
         this._detl = null;
 
@@ -2348,7 +2133,6 @@ export class Incident {
         if (!el) return;
         el.textContent = String(value ?? '').trim();
 
-        // this.resolveDynamicLabels();
     }
 
     _resolveNotepadLabel(el) {
@@ -2404,58 +2188,6 @@ export class Incident {
         );
     }
 
-    _buildDetlBlueprint(req) {
-        return {
-            header: {
-                label: req.label,
-                // optional: show selected id in header, etc.
-            },
-
-            data: {
-                snipId: req.detail.snip,          // e.g. 'clm', 'aut', 'inc'
-                sp: req.detail.sp,               // ParameterSQL proc
-                params: (ctx) => req.detail.params(ctx.rowId),
-                canChoose: !!req.detail.canChoose,
-            },
-
-            // Button policy: detl injects buttons, blueprint suppresses
-            buttons: {
-                showChoose: !!req.detail.canChoose,
-                showClear: true,   // becomes visible after choose (detl state)
-                showClose: true,   // always available when not choosable OR when not chosen
-            },
-        };
-    }
-
-    _buildDetlContext(req) {
-        return {
-            key: req.key,          // tab key: 'claim' | 'auth' | 'elig' | ...
-            label: req.label,      // tab label
-            rowId: req.rowId,      // selected table row id (record identifier)
-            // optional: subjectId/domain for logging only
-        };
-    }
-
-    _buildDetlIO() {
-        return {
-            buildSnip: (snipId) => Core.buildSnip(snipId),
-
-            postParam: async (sp, params) => {
-                const payload = {
-                    spName: sp,
-                    parameters: (params || []).map(p => ({
-                        Key: p.name,
-                        Value: p.value,
-                        Type: 'varchar',
-                    })),
-                };
-
-                const rows = await Core.post('ParameterSQL', payload);
-                return Array.isArray(rows) ? rows : (rows?.rows || []);
-            },
-        };
-    }
-
     async onNpiInputChange(evt) {
         const input = evt.currentTarget;
         if (!(input instanceof HTMLInputElement)) return;
@@ -2469,7 +2201,7 @@ export class Incident {
         if (!npi) return;
 
         const payload = await this.npiqByNumber(npi);
-        
+
         Core.applyBindings(scope, payload);
         Core.applyTables(scope, payload);
     }
@@ -2528,7 +2260,6 @@ export class Incident {
     }
 
     async _selectSubject(ctx, domain, keyId) {
-        console.log('[Incident] select subject', { ctx, domain, keyId });
 
         const detail = await this._getSubjectDetail(domain, keyId);
 
@@ -2603,111 +2334,4 @@ export class Incident {
         return result[0];
     }
 
-    async _loadSubjectReferenceDetail(ctx, domain, keyId) {
-        if (ctx !== 'reference') return;
-
-        const referenceMap = {
-            MEMBER: {
-                keyName: 'MEMB_KEYID',
-                panels: [
-                    {
-                        spName: 'scp.get_member_eligibility',
-                        tableId: 'eligibility-table',
-                        panel: 1,
-                        title: 'Eligibility',
-                    },
-                    {
-                        spName: 'scp.get_member_authorization',
-                        tableId: 'authorization-table',
-                        panel: 2,
-                        title: 'Authorizations',
-                    },
-                    {
-                        spName: 'scp.get_member_claim',
-                        tableId: 'claim-table',
-                        panel: 3,
-                        title: 'Claims',
-                    },
-                    {
-                        spName: 'scp.get_member_incident',
-                        tableId: 'incident-table',
-                        panel: 4,
-                        title: 'Incidents',
-                    },
-                    {
-                        spName: 'scp.get_member_condition',
-                        tableId: 'condition-table',
-                        panel: 5,
-                        title: 'Conditions',
-                    },
-
-                ],
-            },
-
-            PROVIDER: {
-                keyName: 'PROV_KEYID',
-                panels: [
-                    {
-                        spName: 'scp.get_provider_specialty',
-                        tableId: 'specialty-table',
-                        panel: 1,
-                        title: 'Specialty',
-                    },
-                    {
-                        spName: 'scp.get_provider_location',
-                        tableId: 'location-table',
-                        panel: 2,
-                        title: 'Locations',
-                    },
-                ],
-            },
-
-            VENDOR: {
-                keyName: 'VEN_KEYID',
-                panels: [
-                    {
-                        spName: 'scp.get_vendor_roster',
-                        tableId: 'roster-table',
-                        panel: 1,
-                        title: 'Roster',
-                    },
-                    {
-                        spName: 'scp.get_vendor_address',
-                        tableId: 'address-table',
-                        panel: 2,
-                        title: 'Address',
-                    },
-                ],
-            },
-        };
-
-        const cfg = referenceMap[domain];
-        if (!cfg) return;
-
-        const results = [];
-
-        for (const panel of cfg.panels) {
-            const payload = {
-                spName: panel.spName,
-                parameters: [
-                    {
-                        Key: `@p_${cfg.keyName}`,
-                        Value: keyId,
-                        Type: 'varchar',
-                    },
-                ],
-            };
-
-            const result = await Core.post('ParameterSQL', payload);
-            const rows = Array.isArray(result) ? result : [];
-
-            results.push({
-                ...panel,
-                rows,
-            });
-        }
-        console.log('[Incident] reference detail', results);
-
-    }
 }
-

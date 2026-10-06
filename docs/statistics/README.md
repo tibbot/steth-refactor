@@ -6,4 +6,4 @@ Each row can be selected with a mouse, Enter, or Space to retrieve scp.get_last_
 
 Statistics does not load or edit an incident and does not touch the current draft or timer. Loading, empty, missing-user, retrieval-error, and missing-note states are handled. Reopening performs a new retrieval, so newly saved incidents are included.
 
-Verification: tests/statistics.browser.cjs exercises the class with actual Core table and modal implementations in Edge and synthetic transport responses. It covers agent/parameter identity, sorting across years, keyboard selection, literal note markup, clipboard text, empty/error responses, late completion, and preservation of the draft. No database procedure was executed. Live acceptance remains with the owner.
+Verification: tests/statistics.browser.cjs exercises the class with actual Core table and modal implementations in Edge and synthetic transport responses. It covers agent/parameter identity, sorting across years, keyboard selection, literal note markup, clipboard text, empty/error responses, late completion, and preservation of the draft. No database procedure was executed. The owner has confirmed live acceptance.

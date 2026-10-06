@@ -1,6 +1,6 @@
 # Fltr
 
-> **Status:** First pass implemented; awaiting live environment tests
+> **Status:** Implemented; live accepted
 
 ## 1. Executive summary
 Users need to narrow loaded member collections without replacing their records. Implement Core Fltr against the existing RecordFilter contract, deriving controls and matching parent IDs from application declarations. The main cost is managing criteria and asynchronous dialog lifetime consistently across Fltr and Rmgr.
@@ -35,7 +35,7 @@ Use the existing factory and RecordFilter API rather than a parallel configurati
 Date endpoints are inclusive; absent criteria endpoints are unbounded. Reversed or invalid user date ranges block Apply with an inline error. Missing or invalid record dates fail an active date criterion. Define open-ended record intervals consistently with matchMode. Multi-value options retain codes and descriptions, deduplicate by normalized identity, ignore missing values, and use the declared sorting callback where present. Searching an option group changes its displayed choices without clearing selected values. Display labels are assigned as text.
 
 ## 6. Interfaces and data
-Implement RecordFilter and supply it through RecordFilterFactory. Preserve the existing open(sources), applyLocal, applySynced, clear, project, and match boundary. Definitions reference named primary or secondary sources through accessors; Fltr knows no SQL aliases. Criteria are copied on input and output, including arrays and Date values. Map source values to UI string tokens without collisions between typed values; return canonical FilterValue selections. Unknown active concepts and malformed definitions must produce explicit validation errors rather than silently broadening results.
+Implement RecordFilter and supply it through RecordFilterFactory. Preserve the existing open(sources), applyLocal, applySynced, clear, project, and match boundary. Definitions reference named primary or secondary sources through accessors; Fltr knows no SQL aliases. Criteria are copied on input and output, including arrays and Date values. Map source values to UI string tokens without collisions between typed values; return canonical FilterValue selections. Each target projects supported concepts; unsupported shared concepts have no effect on that collection. Malformed definition kinds are rejected.
 
 ### Naming and identity
 setKey comes from the manager contract; concept keys come from filter definitions. parentId identifies the managed primary record. Ignore orphan secondary rows when deriving options and matching. Duplicate option IDs with conflicting labels need a deterministic display policy; matching retains identity.
@@ -58,13 +58,15 @@ Use loaded authorized records only; Fltr makes no HTTP calls and logs no record 
 Pure tests prove identity, OR/AND matching, parent joins, date semantics, source immutability, and null versus empty match results (INV-1, INV-3, INV-4; AC-1, AC-4). Browser tests prove draft isolation, apply/edit/clear, counts, option search, and focus (INV-2, INV-6; AC-2, AC-3, AC-6). Controlled asynchronous integration tests replace the reference during support loading and dialog use (INV-5; AC-5).
 
 ## 11. Risks and tradeoffs
-ctrc.ts permits several primitive value types but the UI option shape uses string identities. A collision-free normalization policy is essential. Rmgr currently commits state before matching; evaluation errors need consistent recovery. Existing date parsing should be reused where its accepted formats match this contract.
+ctrc.ts permits several primitive value types but the UI option shape uses string identities. A collision-free normalization policy is essential. Rmgr evaluates target matches before publishing changed views and restores filter states if evaluation fails. Existing date parsing should be reused where its accepted formats match this contract.
 
-## 12. Open questions
+## 12. Settled behavior
 - Settled: one shared filter applies to every present collection. Each collection projects supported criteria; unsupported criteria have no effect. View Filter shows exact shared criteria and values. Clear restores all collections.
-- What should minimumDistinctValues default to? The first pass defaults to one, honors an explicit threshold, and keeps active groups editable even if their options shrink.
-- How should conflicting labels for one option identity be displayed? Recommend the first nonempty label in stable source order.
-- Should missing record interval endpoints mean an open interval? The first pass treats an absent endpoint as unbounded when the other endpoint is valid; both absent means no date match. Invalid nonempty endpoints fail the date criterion.
+- minimumDistinctValues defaults to one, honors an explicit threshold, and keeps active groups editable even if their options shrink.
+- Duplicate option identities retain their first display label in stable source order; option details merge distinct values across rows and collections.
+- An absent record date endpoint is unbounded when the other endpoint is valid; both absent means no date match. Invalid nonempty endpoints fail the date criterion.
 
 ## 13. Out of scope
-Replacement database queries, persisted criteria across members, arbitrary expressions, fuzzy record search, and domain-specific logic in Core. Live database integration and final visual acceptance remain to be tested by the application owner.
+Replacement database queries, persisted criteria across members, arbitrary expressions, fuzzy record search, and domain-specific logic in Core. The application owner has accepted the implementation in the live test environment.
+
+Provider, Tax ID, and NPI are separate table-based option groups. The application declares a providerAssociation match group, requiring active criteria from those groups to match the same index row. Search labels and table columns are supplied declaratively; Core contains no provider-domain branching.

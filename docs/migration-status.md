@@ -1,11 +1,11 @@
 # Migration status
 
-Completed and live accepted: member search/collections, claim/auth/incident details and supporting records, chosen references and clearing, dynamic labels, action-code synchronization, table labels/sorting/HTML/formatting/counts/scrolling, shared filtering with unified indexes and provider/Tax ID/NPI groups, filter UI, and incident insertion with Save & More/New.
+All identified creation-workflow functionality is implemented and live accepted: member/provider/vendor search and collections; claim/auth/incident detail and supporting records; chosen references and clearing; dynamic labels and action-code synchronization; table presentation, sorting, formatting, counts and scrolling; shared filtering and unified indexes; Health Plan customer lookup; Statistics; incident persistence and Save & More/New.
 
-Provider/vendor collections and detail-button visibility are live accepted. Health Plan is customer-only in legacy and needs no collection contract; lookup parity corrections are live accepted. Statistics has been restored and browser-tested, awaiting live acceptance. Final legacy parity review and cleanup remain within this iteration.
+The legacy parity fixes are live accepted: vendor identity binding, view-only incidents, reset/initialization protection, subtype cancellation/validation, and the CSM user-ID source.
 
-Backlog, outside this iteration: load an existing incident. Editing is not implied because the current persistence procedure is insert-only.
+Cleanup retires unused collection/detail paths, moves detail coverage to active Incident/Core rendering, repairs the table-map test harness, removes obsolete comments/routine diagnostic dumps, and reconciles documentation. Active detail lifecycle protection is regression-tested. All six browser suites pass and independent review approves the cleanup. A live smoke test of the updated active detail path remains with the owner.
 
-Separate CoreBackend observations: support nvarchar and uniqueidentifier transport types. No implementation is included in this migration task.
+Backlog, outside this iteration: loading an existing incident. Editing is not implied because the current procedure is insert-only. NPI query helpers are retained; loading APIs remain as backlog placeholders.
 
-Legacy parity review found vendor binding, incident choice policy, reset/initialization, subtype cancellation/validation, and CSM identity-source gaps. Corrections are implemented, regression-tested, and independently reviewed; awaiting live acceptance before cleanup.
+Separate CoreBackend observations: nvarchar and uniqueidentifier transport support. No Core changes are part of this cleanup.

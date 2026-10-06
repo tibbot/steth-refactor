@@ -10,7 +10,7 @@
  */
 
 import * as Core from 'http://localhost/core-service/';
-console.log('Stethoscope Core ID (Search):', Core.CORE_INSTANCE_ID);
+
 
 /**
  * Search
@@ -149,22 +149,6 @@ export class Search {
 
         return { result: 0 };
 
-        // if (rows.length === 1) {
-        //     return { result: 1, rows, selected: rows[0] };
-        // }
-
-        // const selected = await this._presentPicker(cfg, rows, {
-        //     header: `${cfg.label} matches for "${trimmed}"`,
-        //     allowQueryAgain: true,
-        // });
-
-        // if (selected === '__query_again__') {
-        //     return this.search({ domain: cfg.domain });
-        // }
-
-        // if (!selected) return { result: 0 };
-
-        // return { result: 1, rows, selected };
     }
 
     // --------------------------------------------------

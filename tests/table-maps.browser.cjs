@@ -8,8 +8,7 @@ const server=http.createServer((req,res)=>{
 res.setHeader('Content-Type','text/javascript');
 if(req.url==='/'){res.setHeader('Content-Type','text/html');return res.end('<!doctype html><main></main>');}
 if(req.url==='/core-service/')return res.end("export * from '/tblm.js';");
-if(req.url==='/tblm.js')return res.end(ts.transpileModule(fs.readFileSync(path.join(core,'src/js/tblm.ts'),'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2020,module:ts.ModuleKind.ESNext}}).outputText);
-if(req.url==='/fixture.js')return res.end("import * as Core from '/core-service/'; export class Fixture {"+slice('    _getRelatedDetail(req) {','    async _fetchRelatedDetail')+slice('    async _renderRelatedDetail(req) {','    // 5) Ancestor')+'}');
+if(['/tblm.js','/frmt.js'].includes(req.url))return res.end(ts.transpileModule(fs.readFileSync(path.join(core,'src/js',req.url.slice(1).replace('.js','.ts')),'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2020,module:ts.ModuleKind.ESNext}}).outputText.replaceAll("from './frmt'", "from '/frmt.js'"));if(req.url==='/fixture.js')return res.end("import * as Core from '/core-service/'; export class Fixture {"+slice('    _getRelatedDetail(req) {','    async _fetchRelatedDetail')+slice('    async _renderRelatedDetail(','    // 5) Ancestor')+'}');
 if(req.url==='/member.js')return res.end(fs.readFileSync(path.join(root,'wwwroot/js/modules/contracts/member-contract.js'),'utf8').replaceAll('http://localhost/core-service/','/core-service/'));
 res.statusCode=404;res.end();});
 (async()=>{let browser;try{await new Promise(r=>server.listen(0,'127.0.0.1',r));browser=await chromium.launch({channel:'msedge',headless:true});const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:'+server.address().port);

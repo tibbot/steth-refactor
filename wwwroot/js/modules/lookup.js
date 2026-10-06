@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 /**
  * Stethoscope | lookup
  * ---------------------------------------
@@ -8,12 +8,7 @@
  * © 2025 tibbot, inc. all rights reserved
  */
 
-
-
 import * as Core from 'http://localhost/core-service/';
-console.log('Stethoscope Core ID:', Core.CORE_INSTANCE_ID);
-
-
 
 export class Lookup {
     constructor({ snip, lookupLibrary }) {
@@ -53,7 +48,6 @@ export class Lookup {
         const msg = `Invalid ${label.toLowerCase()} code: "${code}".`;
         Core.displayAsyncModal?.(snip, msg);
     }
-
 
     // CASE 2: user clicked the picker button.
     // `array` is expected to be [ [code, name], [code, name], ... ]

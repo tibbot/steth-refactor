@@ -11,7 +11,7 @@ const server = http.createServer((req, res) => {
     if (req.url === '/favicon.ico') { res.statusCode = 204; return res.end(); }
     if (req.url === '/') { res.setHeader('Content-Type', 'text/html'); return res.end('<!doctype html><button id="opener">Open filter</button><main class="clct"></main><dialog id="modl"><div id="modl-hdr"></div><div id="modl-body"></div><div id="modl-ftr"></div></dialog>'); }
     if (req.url === '/fixture.js') return res.end("import * as Core from '/core.js'; export class Fixture {" + render + '}');
-    if (req.url === '/core.js') return res.end("export * from '/fltr.js';export * from '/rmgr.js';export * from '/clct.js';export * from '/tblm.js';");
+    if (req.url === '/core.js') return res.end("export * from '/fltr.js';export * from '/rmgr.js';export * from '/clct.js';export * from '/tblm.js';export const post = (...args) => window.mockPost(...args);");
     if (req.url === '/member.js') return res.end(fs.readFileSync(path.join(root, 'wwwroot/js/modules/contracts/member-contract.js'), 'utf8').replaceAll('http://localhost/core-service/', '/core.js'));
     const name = req.url.slice(1).replace(/\.js$/, '');
     const file = path.join(core, 'src/js', name + '.ts');
@@ -102,6 +102,51 @@ const server = http.createServer((req, res) => {
         assert.match(await page.getByRole('alert').innerText(), /From must/);
         await page.evaluate(async () => { await manager.load('member-B'); await pending; if (manager.hasActiveFilter() || manager.getViews().some(v => v.visibleCount !== 3)) throw Error('stale dialog applied'); });
         await page.getByRole('dialog').waitFor({ state: 'hidden' });
+        await page.evaluate(async () => {
+            const { Rmgr } = await import('/core.js');
+            const { createMemberContract } = await import('/member.js');
+            const calls = [];
+            let rejectDiagnosis = false;
+            window.mockPost = async (_, payload) => {
+                calls.push(payload);
+                const sp = payload.spName;
+                if (sp.endsWith('_index')) {
+                    if (sp.includes('diagnosis') && rejectDiagnosis) throw Error('retryable index failure');
+                    return ['CLAIM', 'AUTHORIZATION'].map((artifactType, i) => ({
+                        artifactType, artifactId: 'SAME', diagnosisCode: i ? 'AUTH-DX' : 'CLAIM-DX', diagnosisDescription: artifactType,
+                        serviceCode: i ? 'AUTH-SVC' : 'CLAIM-SVC', providerKeyId: i ? 'AUTH-PRV' : 'CLAIM-PRV', providerName: artifactType,
+                    }));
+                }
+                if (sp === 'scp.list_member_claim') return [{ CLAIMNO: 'SAME' }];
+                if (sp === 'scp.list_member_authorization') return [{ AUTHNO: 'SAME' }];
+                return [];
+            };
+            const contract = createMemberContract();
+            const manager = new Rmgr(contract); manager.initialize(); await manager.load('member-A');
+            await Promise.all(['claims','authorizations'].map(key => manager.ensureFilterSupport(key)));
+            const indexes = calls.filter(call => call.spName.endsWith('_index'));
+            if (indexes.length !== 3 || new Set(indexes.map(call => call.spName)).size !== 3) throw Error('indexes were not loaded once');
+            for (const key of ['claims','authorizations']) {
+                const type = key === 'claims' ? 'CLAIM' : 'AUTHORIZATION';
+                const sources = { primary: manager.getPrimary(key), secondary: Object.fromEntries(['diagnoses','services','providers'].map(source => [source, manager.getSecondary(key, source)])) };
+                if (Object.values(sources.secondary).some(rows => rows.length !== 1 || rows[0].artifactType !== type)) throw Error('artifact partition');
+                const filter = contract.createFilter({ setKey: key, label: key, definitions: contract.sets[key].filters });
+                if (filter.deriveOptions(sources).get('diagnosis').length !== 1) throw Error('unified options missing');
+                filter.applyLocal({diagnosis:['CLAIM-DX']});
+                if (filter.match(sources).parentIds.size !== (key === 'claims' ? 1 : 0)) throw Error('same ID crossed artifact types');
+            }
+            await manager.load('member-B');
+            await Promise.all(['claims','authorizations'].map(key => manager.ensureFilterSupport(key)));
+            if (calls.filter(call => call.spName.endsWith('_index')).length !== 6) throw Error('new member reused indexes');
+            await manager.load('member-C'); rejectDiagnosis = true;
+            const failures = await Promise.allSettled(['claims','authorizations'].map(key => manager.ensureFilterSupport(key)));
+            if (failures.some(result => result.status !== 'rejected')) throw Error('shared failure not propagated');
+            rejectDiagnosis = false;
+            await Promise.all(['claims','authorizations'].map(key => manager.ensureFilterSupport(key)));
+            const memberC = calls.filter(call => call.spName.endsWith('_index') && call.parameters[0].Value === 'member-C');
+            if (memberC.length !== 4 || memberC.filter(call => call.spName.includes('diagnosis')).length !== 2) throw Error('shared retry/cache');
+            manager.destroy();
+        });
         assert.deepEqual(errors, []);
         console.log('PASS: generic matching, source identity, shared dialog/view/edit/clear, counts, cancellation, support caching, invalid dates, member replacement, and app rendering');
     } finally { await browser?.close(); server.close(); }

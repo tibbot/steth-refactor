@@ -26,13 +26,9 @@ const procedures = Object.freeze({
   incidents: 'scp.list_member_incident',
   conditions: 'scp.list_member_condition',
 
-  claimDiagnosisIndex: 'scp.list_member_artifact_diagnosis_index',
-  claimServiceIndex: 'scp.list_member_claim_service_index',
-  claimProviderIndex: 'scp.list_member_claim_provider_index',
-
-  authorizationDiagnosisIndex: 'scp.list_member_artifact_diagnosis_index',
-  authorizationServiceIndex: 'scp.list_member_auth_service_index',
-  authorizationProviderIndex: 'scp.list_member_auth_provider_index',
+  diagnosisIndex: 'scp.list_member_artifact_diagnosis_index',
+  serviceIndex: 'scp.list_member_artifact_service_index',
+  providerIndex: 'scp.list_member_artifact_provider_index',
 });
 
 /**
@@ -182,17 +178,23 @@ function createMemberContract() {
         secondary: {
           diagnoses: {
             load: memberKeyId =>
-              loadRows(procedures.claimDiagnosisIndex, memberKeyId),
+              loadRows(procedures.diagnosisIndex, memberKeyId),
+            sharedKey: procedures.diagnosisIndex,
+            select: row => row.artifactType === 'CLAIM',
             requiredForFilter: true,
           },
           services: {
             load: memberKeyId =>
-              loadRows(procedures.claimServiceIndex, memberKeyId),
+              loadRows(procedures.serviceIndex, memberKeyId),
+            sharedKey: procedures.serviceIndex,
+            select: row => row.artifactType === 'CLAIM',
             requiredForFilter: true,
           },
           providers: {
             load: memberKeyId =>
-              loadRows(procedures.claimProviderIndex, memberKeyId),
+              loadRows(procedures.providerIndex, memberKeyId),
+            sharedKey: procedures.providerIndex,
+            select: row => row.artifactType === 'CLAIM',
             requiredForFilter: true,
           },
         },
@@ -213,7 +215,7 @@ function createMemberContract() {
             label: 'Diagnosis',
             kind: 'multi',
             source: 'diagnoses',
-            parentId: row => String(row.CLAIMNO ?? ''),
+            parentId: row => String(row.artifactId ?? row.CLAIMNO ?? ''),
             values: row => codeOption(
               row.diagnosisCode,
               row.diagnosisDescription,
@@ -224,7 +226,7 @@ function createMemberContract() {
             label: 'Service Code',
             kind: 'multi',
             source: 'services',
-            parentId: row => String(row.CLAIMNO ?? ''),
+            parentId: row => String(row.artifactId ?? row.CLAIMNO ?? ''),
             values: row => codeOption(
               row.serviceCode,
               row.serviceDescription,
@@ -235,7 +237,7 @@ function createMemberContract() {
             label: 'Provider',
             kind: 'multi',
             source: 'providers',
-            parentId: row => String(row.CLAIMNO ?? ''),
+            parentId: row => String(row.artifactId ?? row.CLAIMNO ?? ''),
             values: providerOption,
            },
            specialty: {
@@ -291,17 +293,23 @@ function createMemberContract() {
         secondary: {
           diagnoses: {
             load: memberKeyId =>
-              loadRows(procedures.authorizationDiagnosisIndex, memberKeyId),
+              loadRows(procedures.diagnosisIndex, memberKeyId),
+            sharedKey: procedures.diagnosisIndex,
+            select: row => row.artifactType === 'AUTHORIZATION',
             requiredForFilter: true,
           },
           services: {
             load: memberKeyId =>
-              loadRows(procedures.authorizationServiceIndex, memberKeyId),
+              loadRows(procedures.serviceIndex, memberKeyId),
+            sharedKey: procedures.serviceIndex,
+            select: row => row.artifactType === 'AUTHORIZATION',
             requiredForFilter: true,
           },
           providers: {
             load: memberKeyId =>
-              loadRows(procedures.authorizationProviderIndex, memberKeyId),
+              loadRows(procedures.providerIndex, memberKeyId),
+            sharedKey: procedures.providerIndex,
+            select: row => row.artifactType === 'AUTHORIZATION',
             requiredForFilter: true,
           },
         },
@@ -322,7 +330,7 @@ function createMemberContract() {
             label: 'Diagnosis',
             kind: 'multi',
             source: 'diagnoses',
-            parentId: row => String(row.AUTHNO ?? ''),
+            parentId: row => String(row.artifactId ?? row.AUTHNO ?? ''),
             values: row => codeOption(
               row.diagnosisCode,
               row.diagnosisDescription,
@@ -333,7 +341,7 @@ function createMemberContract() {
             label: 'Service Code',
             kind: 'multi',
             source: 'services',
-            parentId: row => String(row.AUTHNO ?? ''),
+            parentId: row => String(row.artifactId ?? row.AUTHNO ?? ''),
             values: row => codeOption(
               row.serviceCode,
               row.serviceDescription,
@@ -344,7 +352,7 @@ function createMemberContract() {
             label: 'Provider',
             kind: 'multi',
             source: 'providers',
-            parentId: row => String(row.AUTHNO ?? ''),
+            parentId: row => String(row.artifactId ?? row.AUTHNO ?? ''),
             values: providerOption,
           },
           specialty: {

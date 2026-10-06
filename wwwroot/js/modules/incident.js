@@ -16,12 +16,16 @@ import { Lookup } from './lookup.js';
 import { Search } from './search.js';
 import { createMemberContract } from './contracts/member-contract.js';
 import { getDetailContract } from './contracts/detail-contracts.js';
+import { IncidentPersistence } from './contracts/persistence-contract.js';
 
 
 export class Incident {
     constructor({ snip }) {
         this.Snip = snip;
-        this.agentId = Core.getCookie('pEL')?.trim() || null; // ezcap user
+        this.agentId = Core.getCookie('pEL')?.trim() || null;
+        this.persistence = new IncidentPersistence({ post: (handler,payload) => Core.post(handler,payload) });
+        this._saveInProgress = false;
+        this._persistedIncidentId = null;
         console.log(this.agentId);
 
         // Minimal state (no shadow object)
@@ -289,7 +293,9 @@ export class Incident {
                 try {
                     handler.call(this, evt);
                 } finally {
-                    this._ensureContact(evt); // start timer after first real interaction
+                    if (!["save-more-btn", "save-new-btn", "reset-btn"].includes(evt.target?.id)) {
+                        void this._ensureContact(evt).catch(error => Core.error?.("[Incident] contact initialization", error));
+                    }
                 }
             };
 
@@ -788,36 +794,61 @@ export class Incident {
         //if (ok) this._clearForm();
     }
 
-    async saveAndMore(_e) {
-        await this.save();
+    async saveAndMore(_e) { return this._runSave('more'); }
+    async saveAndNew(_e) { return this._runSave('new'); }
+    async save() { return this._runSave('stay'); }
 
-        this.clearSection(['reference', 'resolution']);
-        this.incidentId = null;
-        this.isDirty = false;
-
-        this._stopTimer();
-        this.incidentId = null;
-
-        await this._initiateContact(); // immediately spin up next incident + timer
+    async _runSave(next) {
+        if (this._saveInProgress) return false;
+        this._saveInProgress = true;
+        const controls = Array.from(document.querySelectorAll('#save-more-btn, #save-new-btn, #reset-btn'));
+        const disabled = controls.map(control => control.disabled);
+        controls.forEach(control => { control.disabled = true; });
+        const root = document.getElementById('scp');
+        const wasInert = root?.inert;
+        if (root) root.inert = true;
+        const notify = message => Core.displayAsyncModalSettled(Core.buildSnip('msg'), message);
+        let persisted = false;
+        try {
+            if (this._persistedIncidentId !== this.incidentId || !this.incidentId) {
+                if (this._contactPromise) await this._contactPromise;
+                if (!this.incidentId) await this._ensureContact();
+                const payload = this.collect();
+                if (!await this.validate(payload)) return false;
+                const result = await this.persistence.insert(payload);
+                this._persistedIncidentId = this.incidentId;
+                persisted = true;
+                this.isDirty = false;
+                await notify(result.incidentNumber + ' created. ' + result.message);
+            }
+            if (next === 'more') {
+                this.clearSection(['reference', 'resolution']);
+                this._clearCategories(['reference']);
+                this._resetIncidentNotepad();
+                this.incidentId = null;
+                this._persistedIncidentId = null;
+                this._stopTimer();
+                await this._initiateContact();
+                if (!this.incidentId) throw new Error('Unable to obtain the next incident number.');
+                this.isDirty = false;
+            } else if (next === 'new') {
+                this._clearForm();
+                this._persistedIncidentId = null;
+                this._syncHeader();
+            }
+            return true;
+        } catch (error) {
+            // Keep the form intact on failure; a confirmed insert is never retried.
+            await notify((persisted ? 'The incident was saved, but the next step failed: ' : 'Unable to save the incident: ') + error.message);
+            return false;
+        } finally {
+            if (root) root.inert = wasInert;
+            controls.forEach((control,index) => { control.disabled = disabled[index]; });
+            this._saveInProgress = false;
+        }
     }
 
-    async saveAndNew(_e) {
-        await this.save();
-        this._clearForm();
-        this.incidentId = null;
-        this._syncHeader();
-    }
-
-    async save() {
-        const payload = this.collect();
-        const valid = await this.validate(payload);
-        if (!valid) return;
-        // TODO: wire to scp.set_incident via Core.post('ParameterSQL', ...)
-        console.debug('save payload', payload);
-        this.isDirty = false;
-    }
-
-    async closeIncident(_id) { await this.save(); }
+    async closeIncident(_id) { return this.save(); }
 
     // ————————————————————————————————————————————
     // Sync & Utilities
@@ -930,32 +961,21 @@ export class Incident {
 
 
     collect() {
-        // Only gather fields relevant to this pass (contact rel, phones; customer/ref ids; REFERENCE triad; resolution)
-        const ids = [
-            'ctc-rel', 'ctc-ph', 'ctc-fx',
-            'customer-id',
-            'reference-type', 'reference-subtype', 'reference-subcode', 'reference-id',
-            'res-status',
-        ];
-        const out = { incidentId: this.incidentId, agentId: this.agentId };
-        for (const id of ids) {
-            const el = document.getElementById(id);
-            if (el) out[id] = el.value;
-        }
-        return out;
+        return this.persistence.collect(document, {
+            incidentId: this.incidentId,
+            agentId: this.agentId,
+            userId: Core.getCookie('pUID'),
+            timerStart: this.timerStart,
+            chosen: this._chosen,
+        });
     }
 
-    async validate(_payload) {
-        if (!Core.vldt?.validateForm) return true;
-        const result = Core.vldt.validateForm('#scp');
-        if (!result?.ok) {
-            const cfm = Core.buildSnip('cfm');
-            await Core.displayAsyncModal(cfm, 'Please correct the highlighted fields.');
-            return false;
-        }
-        return true;
+    async validate(payload) {
+        const errors = this.persistence.errors(payload);
+        if (!errors.length) return true;
+        await Core.displayAsyncModalSettled(Core.buildSnip('msg'), errors.join('\n'));
+        return false;
     }
-
     clearSection(sectionNames) {
         const sections = Array.isArray(sectionNames) ? sectionNames : [sectionNames];
         const npd = document.getElementById('npd');
@@ -971,6 +991,7 @@ export class Incident {
                     try {
                         if (el.type === 'radio') return;
                         Core.clearElement(el);
+                        if (el.dataset?.code !== undefined) el.dataset.code = '';
                     } catch (err) {
                         Core.error('[incident] clearSection', { section, err });
                     }
@@ -1182,6 +1203,7 @@ export class Incident {
 
         this.isDirty = false;
         this.incidentId = null;
+        this._persistedIncidentId = null;
         this._stopTimer?.();
 
         window.scrollTo({
@@ -1336,12 +1358,14 @@ export class Incident {
         }
 
         // Prevent double-init if multiple events land at once
-        if (this._contactInitializing) return;
+        if (this._contactPromise) return this._contactPromise;
         this._contactInitializing = true;
 
         try {
-            await this._initiateContact();
+            this._contactPromise = this._initiateContact();
+            await this._contactPromise;
         } finally {
+            this._contactPromise = null;
             this._contactInitializing = false;
         }
     }

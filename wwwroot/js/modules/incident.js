@@ -666,7 +666,7 @@ export class Incident {
         const customerIdEl = document.getElementById('customer-id');
         const customerId = customerIdEl?.value?.trim();
 
-        const validCats = ['MEMBER', 'PROVIDER', 'VENDOR', 'HEALTHPLAN'];
+        const validCats = ['MEMBER', 'PROVIDER', 'VENDOR'];
         const isValidCategory = validCats.includes(customerCategory || '');
 
         const refRadios = document.querySelectorAll('input[name="reference.category"]');
@@ -1063,6 +1063,12 @@ export class Incident {
     }
 
     async drawSearch(searchType, ctx) {
+        if (String(searchType).toUpperCase() === 'HEALTHPLAN') {
+            if (ctx !== 'customer') return;
+            const code = await this._chooseHealthplan();
+            if (code) await this._selectSubject(ctx, 'HEALTHPLAN', code);
+            return;
+        }
         if (!this.search) {
             console.warn('[Incident] Search instance not initialized');
             return;
@@ -1085,6 +1091,40 @@ export class Incident {
 
         await this._selectSubject(ctx, domain, result.keyId);
 
+    }
+
+    async _chooseHealthplan() {
+        const plans = this.lookupStore.arrHealthplan || [];
+        if (!plans.length) {
+            await Core.displayAsyncModalSettled(Core.buildSnip('msg'), 'No health plans are available.');
+            return null;
+        }
+        const fragment = Core.buildSnip('hsx');
+        const select = fragment?.querySelector('#qry-health-plan');
+        const confirm = fragment?.querySelector('#search-btn');
+        const cancel = fragment?.querySelector('#cancel-btn');
+        if (!select || !confirm || !cancel) throw new Error('The Health Plan selection layout is incomplete.');
+        const heading = fragment.querySelector('h2');
+        if (heading) heading.textContent = 'Choose Health Plan';
+        this._populateSelect(select, plans, { includeBlank: true });
+        select.required = true;
+        return new Promise(resolve => {
+            let selection = null;
+            const handle = Core.drawDialog({ body: fragment, className: 'modl-medium',
+                onClose: () => resolve(selection),
+            });
+            const choose = () => {
+                if (!select.reportValidity()) return;
+                selection = select.value;
+                handle.close('select');
+            };
+            confirm.addEventListener('click', choose);
+            cancel.addEventListener('click', () => handle.close('cancel'));
+            select.addEventListener('keydown', event => {
+                if (event.key === 'Enter') { event.preventDefault(); choose(); }
+            });
+            select.focus();
+        });
     }
 
     _normalizeSubjectDetail(domain, row) {
@@ -1147,7 +1187,9 @@ export class Incident {
             };
 
             const key = keyByDomain[domain];
-            idInput.value = key ? String(selected[key] ?? '').trim() : '';
+            idInput.value = domain === 'HEALTHPLAN'
+                ? String(selected.healthplan_name ?? '').trim()
+                : key ? String(selected[key] ?? '').trim() : '';
             this.syncNotepadField(idInput);
         }
 
@@ -2549,6 +2591,7 @@ export class Incident {
             HEALTHPLAN: {
                 spName: 'scp.get_healthplan_detail',
                 keyName: 'HPCODE',
+                parameter: '@p_healthplan_code',
             },
         };
 
@@ -2560,7 +2603,7 @@ export class Incident {
 
         const parameters = [
             {
-                Key: `@p_${cfg.keyName}`,
+                Key: cfg.parameter || `@p_${cfg.keyName}`,
                 Value: keyId,
                 Type: 'varchar',
             },

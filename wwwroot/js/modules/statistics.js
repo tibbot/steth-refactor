@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as Core from 'http://localhost/core-service/';
 
 /** Today's incidents for the current agent, with latest-note inspection. */

@@ -1,4 +1,6 @@
+// @ts-nocheck
 import * as Core from 'http://localhost/core-service/';
+
 
 /** Application adapter for non-choosable subject collections. */
 export function subjectCollection({ key, label, procedure, parameter, tableId, columns }) {

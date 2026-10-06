@@ -15,6 +15,8 @@ console.log('Stethoscope Core ID:', Core.CORE_INSTANCE_ID);
 import { Lookup } from './lookup.js';
 import { Search } from './search.js';
 import { createMemberContract } from './contracts/member-contract.js';
+import { createProviderContract } from './contracts/provider-contract.js';
+import { createVendorContract } from './contracts/vendor-contract.js';
 import { getDetailContract } from './contracts/detail-contracts.js';
 import { IncidentPersistence } from './contracts/persistence-contract.js';
 
@@ -1814,11 +1816,9 @@ export class Incident {
             subjectId,
         });
 
-        if (D !== 'MEMBER') {
-            console.log('[Incident] collection domain not migrated yet', {
-                domain: D,
-                subjectId,
-            });
+        const factory = { MEMBER: createMemberContract, PROVIDER: createProviderContract, VENDOR: createVendorContract }[D];
+        if (!factory) {
+            this._clearReferenceSystem();
             return;
         }
 
@@ -1835,15 +1835,17 @@ export class Incident {
         this._referenceDomain = D;
         this._referenceKeyId = subjectId;
 
-        const contract = createMemberContract();
+        const contract = factory();
 
-        this._rmgr = new Core.Rmgr(contract);
-        this._rmgr.initialize();
+        const manager = new Core.Rmgr(contract);
+        this._rmgr = manager;
+        manager.initialize();
 
         try {
-            await this._rmgr.load(subjectId);
+            await manager.load(subjectId);
         }
         catch (error) {
+            if (this._rmgr !== manager) return;
             console.error('[Incident] Rmgr load failed', error);
             if (error instanceof AggregateError) {
                 error.errors.forEach((cause, index) => {
@@ -1856,91 +1858,23 @@ export class Incident {
             throw error;
         }
 
-        const eligibility = this._rmgr.getView('eligibility');
-        const eligibilitySet = contract.sets.eligibility;
-
-        const authorizations = this._rmgr.getView('authorizations');
-        const authorizationsSet = contract.sets.authorizations;
-
-        const claims = this._rmgr.getView('claims');
-        const claimsSet = contract.sets.claims;
-
-        const incidents = this._rmgr.getView('incidents');
-        const incidentsSet = contract.sets.incidents;
-
-        const conditions = this._rmgr.getView('conditions');
-        const conditionsSet = contract.sets.conditions;
-
-
-        console.log('[Incident] rmgr claims', claims);
-        console.log('[Incident] first claim', claims.records?.[0]);
-
-
+        if (this._rmgr !== manager) return;
 
         const blueprint = {
             autoHydrate: false,
-            activeTabKey: 'eligibility',
-
-            tabs: [
-                {
-                    key: 'eligibility',
-                    label: 'Eligibility',
-                    panel: {
-                        kind: 'table',
-                        tableId: eligibilitySet.metadata.tableId,
-                        selectable: false,
-                        sortable: true,
-                        rowCountInTab: true,
-                    },
+            activeTabKey: Object.keys(contract.sets)[0],
+            tabs: Object.values(contract.sets).map(set => ({
+                key: set.key,
+                label: set.label,
+                panel: {
+                    kind: 'table',
+                    tableId: set.metadata.tableId,
+                    selectable: !!set.metadata.detail,
+                    sortable: true,
+                    rowCountInTab: true,
                 },
-                {
-                    key: 'authorizations',
-                    label: 'Authorizations',
-                    panel: {
-                        kind: 'table',
-                        tableId: authorizationsSet.metadata.tableId,
-                        selectable: true,
-                        sortable: true,
-                        rowCountInTab: true,
-                    },
-                    detail: authorizationsSet.metadata.detail,
-                },
-                {
-                    key: 'claims',
-                    label: 'Claims',
-                    panel: {
-                        kind: 'table',
-                        tableId: claimsSet.metadata.tableId,
-                        selectable: true,
-                        sortable: true,
-                        rowCountInTab: true,
-                    },
-                    detail: claimsSet.metadata.detail,
-                },
-                {
-                    key: 'incidents',
-                    label: 'Incidents',
-                    panel: {
-                        kind: 'table',
-                        tableId: incidentsSet.metadata.tableId,
-                        selectable: true,
-                        sortable: true,
-                        rowCountInTab: true,
-                    },
-                    detail: incidentsSet.metadata.detail,
-                },
-                {
-                    key: 'conditions',
-                    label: 'Conditions',
-                    panel: {
-                        kind: 'table',
-                        tableId: conditionsSet.metadata.tableId,
-                        selectable: false,
-                        sortable: true,
-                        rowCountInTab: true,
-                    },
-                },
-            ],
+                detail: set.metadata.detail,
+            })),
         };
 
         const host = document.querySelector('.clct');
@@ -1950,7 +1884,7 @@ export class Incident {
             return;
         }
 
-        this._clct = new Core.Clct({
+        const collection = new Core.Clct({
             host,
             blueprint,
 
@@ -1986,11 +1920,12 @@ export class Incident {
             },
         });
 
-        await this._clct.build();
+        this._clct = collection;
+        await collection.build();
+        if (this._rmgr !== manager || this._clct !== collection) return;
         host.classList.remove('dnd');
 
 
-        const manager = this._rmgr;
         manager.subscribe(({ change }) => {
             if (this._rmgr === manager && change.reason === 'view-updated') {
                 this._refreshCollectionViews(contract);

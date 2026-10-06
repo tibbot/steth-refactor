@@ -19,3 +19,5 @@ The provider role remains available as support-row data; this change does not ad
 Verification: `tests/fltr.browser.cjs` checks the actual member contract with synthetic procedure responses, exactly three index requests, same-text claim/auth identities, option derivation, reference replacement, and shared failure/retry. Core TypeScript checking also passes. Live SQL execution was not performed.
 
 SQL source observations left for the owner: the service claim branch declares cdx but references det, and selects DIAGCODE as serviceCode; confirm the intended service-code column. The provider vendor join references prv although the provider alias is cpy. SQL files were not edited.
+
+UI update: Tax ID and NPI are distinct multi-selection groups. Provider, Tax ID, and NPI definitions share providerAssociation as their matchGroup, requiring every active provider criterion to match the same index row. OR remains within each group; other groups combine with AND at the artifact level. Declarative columns and option details supply the table presentation without domain branching in Core.

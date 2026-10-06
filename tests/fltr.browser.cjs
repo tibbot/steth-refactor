@@ -8,8 +8,9 @@ const source = fs.readFileSync(path.join(root, 'wwwroot/js/modules/incident.js')
 const render = source.slice(source.indexOf('    _refreshCollectionViews(contract) {'), source.indexOf('    // -----------------------------------------', source.indexOf('    _refreshCollectionViews(contract) {')));
 const server = http.createServer((req, res) => {
     res.setHeader('Content-Type', 'text/javascript');
+    if (/^\/css\/[a-z-]+\.css$/.test(req.url)) { res.setHeader('Content-Type','text/css'); return res.end(fs.readFileSync(path.join(core,'public',req.url),'utf8')); }
     if (req.url === '/favicon.ico') { res.statusCode = 204; return res.end(); }
-    if (req.url === '/') { res.setHeader('Content-Type', 'text/html'); return res.end('<!doctype html><button id="opener">Open filter</button><main class="clct"></main><dialog id="modl"><div id="modl-hdr"></div><div id="modl-body"></div><div id="modl-ftr"></div></dialog>'); }
+    if (req.url === '/') { res.setHeader('Content-Type', 'text/html'); return res.end('<!doctype html><meta name=viewport content="width=device-width,initial-scale=1"><link rel=stylesheet href=/css/core-vars.css><link rel=stylesheet href=/css/core.css><link rel=stylesheet href=/css/modl.css><link rel=stylesheet href=/css/fltr.css><button id="opener">Open filter</button><main class="clct"></main><dialog id="modl"><div id="modl-hdr"></div><div id="modl-body"></div><div id="modl-ftr"></div></dialog>'); }
     if (req.url === '/fixture.js') return res.end("import * as Core from '/core.js'; export class Fixture {" + render + '}');
     if (req.url === '/core.js') return res.end("export * from '/fltr.js';export * from '/rmgr.js';export * from '/clct.js';export * from '/tblm.js';export const post = (...args) => window.mockPost(...args);");
     if (req.url === '/member.js') return res.end(fs.readFileSync(path.join(root, 'wwwroot/js/modules/contracts/member-contract.js'), 'utf8').replaceAll('http://localhost/core-service/', '/core.js'));
@@ -147,6 +148,47 @@ const server = http.createServer((req, res) => {
             if (memberC.length !== 4 || memberC.filter(call => call.spName.includes('diagnosis')).length !== 2) throw Error('shared retry/cache');
             manager.destroy();
         });
+        await page.evaluate(async () => {
+            const { Fltr } = await import('/core.js'); const { createMemberContract } = await import('/member.js');
+            const definitions = createMemberContract().sets.claims.filters;
+            const sources = { primary: [{CLAIMNO:'1'},{CLAIMNO:'2'}], secondary: { diagnoses: [], services: [], providers: [
+                {artifactId:'1',providerKeyId:'P1',providerName:'Alpha Clinic',providerTaxId:'T1',providerNpi:'N1'},
+                {artifactId:'1',providerKeyId:'P2',providerName:'Beta Clinic',providerTaxId:'T2',providerNpi:'N2'},
+                {artifactId:'2',providerKeyId:'P3',providerName:'Gamma Clinic',providerTaxId:'T1',providerNpi:'N2'},
+            ] } };
+            const filter = new Fltr({setKey:'claims',label:'Claims',definitions});
+            filter.applyLocal({taxId:['T1'],npi:['N2']});
+            if ([...filter.match(sources).parentIds].join() !== '2') throw Error('Tax ID and NPI crossed provider rows');
+            filter.applyLocal({taxId:['T1','T2'],npi:['N1','N2']});
+            if (filter.match(sources).parentIds.size !== 2) throw Error('identifier OR semantics');
+            filter.applyLocal({provider:['P1'],taxId:['T1'],npi:['N2']});
+            if (filter.match(sources).parentIds.size !== 0) throw Error('provider identity crossed identifier row');
+            const options = filter.deriveOptions(sources).get('taxId');
+            if (options.find(o=>o.label==='T1').details.providerName.length !== 2) throw Error('identifier names not combined');
+            filter.clear(); window.uiFilter = filter; window.uiSources = sources; window.pending = filter.open(sources);
+        });
+        await page.getByRole('dialog', {name:'Filter Results'}).waitFor({state:'visible'});
+        const tax = page.locator('fieldset').filter({has:page.locator('legend', {hasText:/^Tax ID$/})});
+        const npi = page.locator('fieldset').filter({has:page.locator('legend', {hasText:/^NPI$/})});
+        assert.equal(await tax.getByRole('columnheader', {name:'Tax ID',exact:true}).count(),1);
+        await tax.getByRole('row').filter({hasText:'T1'}).click();
+        assert.equal(await tax.getByRole('checkbox', {name:'T1',exact:true}).isChecked(),true);
+        await tax.getByRole('searchbox').fill('Beta');
+        assert.equal(await tax.getByRole('checkbox', {name:'T1',exact:true}).isVisible(),false);
+        await tax.getByRole('searchbox').fill('');
+        await npi.getByRole('checkbox', {name:'N2',exact:true}).check();
+        const desktop = await page.evaluate(() => {
+            const dialog=document.getElementById('modl'), buttons=[...document.querySelectorAll('.fltr__actions button')];
+            return { overflow:dialog.scrollWidth>dialog.clientWidth, widths:buttons.map(b=>b.getBoundingClientRect().width), padding:parseFloat(getComputedStyle(document.getElementById('modl-body')).paddingLeft) };
+        });
+        assert.equal(desktop.overflow,false); assert.equal(desktop.widths[0],desktop.widths[1]); assert(desktop.padding>=24);
+        await page.mouse.move(0,0);
+        await page.screenshot({path:path.join(process.env.TEMP,'steth-filter-desktop.png'),fullPage:true});
+        await page.setViewportSize({width:390,height:844});
+        assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+        await page.screenshot({path:path.join(process.env.TEMP,'steth-filter-narrow.png'),fullPage:true});
+        await page.getByRole('button', {name:'Apply',exact:true}).click();
+        await page.evaluate(async()=>{ const result=await pending; uiFilter.applyLocal(result.criteria); if ([...uiFilter.match(uiSources).parentIds].join()!=='2') throw Error('table UI identifier matching'); });
         assert.deepEqual(errors, []);
         console.log('PASS: generic matching, source identity, shared dialog/view/edit/clear, counts, cancellation, support caching, invalid dates, member replacement, and app rendering');
     } finally { await browser?.close(); server.close(); }

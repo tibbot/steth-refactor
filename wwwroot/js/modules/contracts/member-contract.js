@@ -77,6 +77,7 @@ function codeOption(value, description) {
     value: code,
     label: text ? `${code} — ${text}` : code,
     searchText: `${code} ${text}`.trim(),
+    details: { code: [code], description: [text] },
   };
 }
 
@@ -97,6 +98,7 @@ function providerOption(row) {
 
   return {
     value: providerKeyId,
+    details: { providerName: [providerName], providerTaxId: [providerTaxId], providerNpi: [providerNpi], providerId: [String(row.providerId ?? providerKeyId)] },
     label: providerName
       ? `${providerName} · ${providerKeyId}`
       : providerKeyId,
@@ -107,6 +109,26 @@ function providerOption(row) {
       providerNpi,
       providerRole,
     ].filter(Boolean).join(' '),
+  };
+}
+
+/** Provider identity concepts share one association-row match group. */
+function providerFilters(primaryKey) {
+  const parentId = row => String(row.artifactId ?? row[primaryKey] ?? '');
+  const identifierOption = (row, field) => {
+    const value = String(row[field] ?? '').trim();
+    if (!value) return null;
+    return { value, label: value, searchText: value + ' ' + String(row.providerName ?? ''),
+      details: { identifier: [value], providerName: [String(row.providerName ?? '')] } };
+  };
+  const base = { kind: 'multi', source: 'providers', parentId, matchGroup: 'providerAssociation' };
+  return {
+    provider: { ...base, concept: 'provider', label: 'Provider', searchLabel: 'Search providers by name, Tax ID, NPI, or Provider ID', values: providerOption,
+      columns: [{key:'providerName',label:'Provider Name'},{key:'providerTaxId',label:'Tax ID'},{key:'providerNpi',label:'NPI'},{key:'providerId',label:'Provider ID'}] },
+    taxId: { ...base, concept: 'taxId', label: 'Tax ID', searchLabel: 'Search Tax IDs or provider names', values: row => identifierOption(row, 'providerTaxId'),
+      columns: [{key:'identifier',label:'Tax ID'},{key:'providerName',label:'Provider Name'}] },
+    npi: { ...base, concept: 'npi', label: 'NPI', searchLabel: 'Search NPIs or provider names', values: row => identifierOption(row, 'providerNpi'),
+      columns: [{key:'identifier',label:'NPI'},{key:'providerName',label:'Provider Name'}] },
   };
 }
 
@@ -212,6 +234,8 @@ function createMemberContract() {
           },
           diagnosis: {
             concept: 'diagnosis',
+            searchLabel: 'Search diagnoses',
+            columns: [{key:'code',label:'Code'},{key:'description',label:'Description'}],
             label: 'Diagnosis',
             kind: 'multi',
             source: 'diagnoses',
@@ -223,6 +247,8 @@ function createMemberContract() {
           },
           serviceCode: {
             concept: 'serviceCode',
+            searchLabel: 'Search services',
+            columns: [{key:'code',label:'Code'},{key:'description',label:'Description'}],
             label: 'Service Code',
             kind: 'multi',
             source: 'services',
@@ -232,16 +258,11 @@ function createMemberContract() {
               row.serviceDescription,
             ),
           },
-          provider: {
-            concept: 'provider',
-            label: 'Provider',
-            kind: 'multi',
-            source: 'providers',
-            parentId: row => String(row.artifactId ?? row.CLAIMNO ?? ''),
-            values: providerOption,
-           },
+          ...providerFilters('CLAIMNO'),
            specialty: {
              concept: 'specialty',
+            searchLabel: 'Search specialties',
+            columns: [{key:'code',label:'Code'},{key:'description',label:'Description'}],
             label: 'Specialty',
              kind: 'multi',
              source: 'primary',
@@ -327,6 +348,8 @@ function createMemberContract() {
           },
           diagnosis: {
             concept: 'diagnosis',
+            searchLabel: 'Search diagnoses',
+            columns: [{key:'code',label:'Code'},{key:'description',label:'Description'}],
             label: 'Diagnosis',
             kind: 'multi',
             source: 'diagnoses',
@@ -338,6 +361,8 @@ function createMemberContract() {
           },
           serviceCode: {
             concept: 'serviceCode',
+            searchLabel: 'Search services',
+            columns: [{key:'code',label:'Code'},{key:'description',label:'Description'}],
             label: 'Service Code',
             kind: 'multi',
             source: 'services',
@@ -347,16 +372,11 @@ function createMemberContract() {
               row.serviceDescription,
             ),
           },
-          provider: {
-            concept: 'provider',
-            label: 'Provider',
-            kind: 'multi',
-            source: 'providers',
-            parentId: row => String(row.artifactId ?? row.AUTHNO ?? ''),
-            values: providerOption,
-          },
+          ...providerFilters('AUTHNO'),
           specialty: {
             concept: 'specialty',
+            searchLabel: 'Search specialties',
+            columns: [{key:'code',label:'Code'},{key:'description',label:'Description'}],
             label: 'Specialty',
             kind: 'multi',
             source: 'primary',

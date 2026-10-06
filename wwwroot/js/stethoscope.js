@@ -2,6 +2,7 @@
 import * as Core from 'http://localhost/core-service/';
 console.log('Stethoscope Core ID:', Core.CORE_INSTANCE_ID);
 import { Incident } from './modules/incident.js';
+import { Statistics } from './modules/statistics.js';
 
 
 // Core configuration for UI setup and listener mapping
@@ -61,6 +62,7 @@ async function main() {
     Core.setAppAsset('app-image', '/img/scp.png');
 
     // build the app menu
+    const statistics = new Statistics();
     const menu = new Core.AppMenu({
         trigger: document.getElementById('app-menu-button'),
         items: [
@@ -74,7 +76,7 @@ async function main() {
                     Core.showPreferences('prf');
                     break;
                 case 'statistics':
-                    // TODO: migrate showStatistics
+                    void statistics.show();
                     break;
                 default:
                     callbackMap[action]?.();

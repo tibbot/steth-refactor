@@ -28,6 +28,8 @@ export class Incident {
         this.persistence = new IncidentPersistence({ post: (handler,payload) => Core.post(handler,payload) });
         this._saveInProgress = false;
         this._persistedIncidentId = null;
+        this.csmUserId = null;
+        this._contactGeneration = 0;
         console.log(this.agentId);
 
         // Minimal state (no shadow object)
@@ -171,7 +173,6 @@ export class Incident {
         await this._initReferenceTriad();
 
         this._attachListeners();
-        this._attachValidation();
         this._initLookupBindings();
         this._initResolutionEnsureContact();
 
@@ -322,21 +323,6 @@ export class Incident {
     // ————————————————————————————————————————————
     // Validation (Core vldt)
     // ————————————————————————————————————————————
-
-    _attachValidation() {
-
-        Core.vldt?.initForm('#scp', {
-            // Contact
-            '#ctc-rel': [{ rule: 'required', msg: 'Relationship required' }],
-            // Reference triad
-            '#reference-type': [{ rule: 'required', msg: 'Type required' }],
-            '#reference-subtype': [{ rule: 'required', msg: 'Subtype required' }],
-            '#reference-subcode': [
-                { rule: 'required', msg: 'Code required' },
-                { rule: 'custom', fn: () => this._isValidSubcode('reference'), msg: 'Invalid code for selected subtype' },
-            ],
-        });
-    }
 
     // ————————————————————————————————————————————
     // Handlers
@@ -966,7 +952,7 @@ export class Incident {
         return this.persistence.collect(document, {
             incidentId: this.incidentId,
             agentId: this.agentId,
-            userId: Core.getCookie('pUID'),
+            userId: this.csmUserId,
             timerStart: this.timerStart,
             chosen: this._chosen,
         });
@@ -974,6 +960,7 @@ export class Incident {
 
     async validate(payload) {
         const errors = this.persistence.errors(payload);
+        if (!this._isValidSubcode('reference')) errors.push('Select a valid Type, Subtype, and Subtype Code combination.');
         if (!errors.length) return true;
         await Core.displayAsyncModalSettled(Core.buildSnip('msg'), errors.join('\n'));
         return false;
@@ -1152,7 +1139,8 @@ export class Incident {
                 };
             case 'VENDOR':
                 return {
-                    vendor_vendor_tax_id: row.vendor_tax_id,
+                    ...row,
+                    vendorid: row.vendor_id, // Compatibility with older database snippets.
                     vendor_npi: row.npi,
                     vendor_full_name: row.full_name,
                     vendor_address: row.address,
@@ -1240,6 +1228,9 @@ export class Incident {
 
 
     _clearForm() {
+        this._contactGeneration++;
+        this._contactPromise = null;
+        this.csmUserId = null;
         this.clearSection(['contact', 'customer', 'reference', 'resolution']);
         this._clearCategories(['contact', 'customer', 'reference']);
         this._resetSearchUI();
@@ -1294,7 +1285,7 @@ export class Incident {
         if (this.agentId) Core.updateNotepad(this.agentId, 'Agent');
     }
 
-    async _fetchCsiNo() {
+    async _fetchCsiNo(generation = this._contactGeneration) {
         try {
             
             const username = this.agentId || '';
@@ -1312,6 +1303,7 @@ export class Incident {
             };
 
             const result = await Core.post('ParameterSQL', payload);
+            if (generation !== this._contactGeneration) return null;
             const row = Array.isArray(result) ? result[0] : result;
             const csino = row?.CSINO ?? row?.csino ?? null;
 
@@ -1321,6 +1313,8 @@ export class Incident {
             }
 
             this.incidentId = String(csino); 
+            const csmUserId = Number(row.csm_user_id);
+            this.csmUserId = Number.isInteger(csmUserId) && csmUserId > 0 ? csmUserId : null;
 
             const incidentNumber = document.getElementById('incident_number');
             if (incidentNumber) incidentNumber.textContent = this.incidentId;
@@ -1335,11 +1329,13 @@ export class Incident {
 
     async _initiateContact() {
         if (this.incidentId) return;
+        const generation = this._contactGeneration;
 
         const now = new Date();
 
         // CSINO
-        const csino = await this._fetchCsiNo();
+        const csino = await this._fetchCsiNo(generation);
+        if (!csino || generation !== this._contactGeneration) return;
 
         if (csino) {
             const npdInc = document.getElementById('incident_number');
@@ -1403,14 +1399,12 @@ export class Incident {
 
         // Prevent double-init if multiple events land at once
         if (this._contactPromise) return this._contactPromise;
-        this._contactInitializing = true;
-
+        const pending = this._initiateContact();
+        this._contactPromise = pending;
         try {
-            this._contactPromise = this._initiateContact();
-            await this._contactPromise;
+            await pending;
         } finally {
-            this._contactPromise = null;
-            this._contactInitializing = false;
+            if (this._contactPromise === pending) this._contactPromise = null;
         }
     }
 
@@ -1587,7 +1581,11 @@ export class Incident {
             // more than 1 match => let user pick the correct type/subtype
             chosen = await this._chooseSubcode(matches);
             if (!chosen) {
-                // cancelled picker; leave current values as-is
+                if (typeSel) typeSel.value = '';
+                if (subSel) this._populateSelect(subSel, [], { includeBlank: true });
+                input.value = '';
+                this.syncNotepadField(typeSel);
+                this.syncNotepadField(subSel);
                 this.syncNotepadField(input);
                 return;
             }
@@ -1623,59 +1621,34 @@ export class Incident {
     }
 
     async _chooseSubcode(matches) {
-        // matches: [{ typeCode, typeDesc, subCode, subDesc }, ...]
         if (!matches.length) return null;
-
-        const rows = matches.map(m => [
-            m.typeCode,
-            m.typeDesc,
-            m.subCode,
-            m.subDesc,
-        ]);
-
-        const headers = ['Type Code', 'Type', 'Sub Code', 'Subtype'];
-        const tableId = 'ref-dup-table';
-
-        const snip = document.createElement('div');
-        snip.id = 'type-picker';
-
-        snip.innerHTML = '';
-
-        const header = document.createElement('h2');
-        header.textContent = 'Select Type';
-        snip.appendChild(header);
-
-        const table = Core.buildTable(rows, headers, tableId);
-        snip.appendChild(table);
-
-        Core.drawModal(snip, '800px');
-
-        return new Promise((resolve) => {
-            Core.addTrListener(tableId, 'click', (row) => {
-                const idx = row.rowIndex - 1; // account for header row
-
-                // Safety guard in case id isn't set or is weird
-                if (Number.isNaN(idx) || idx < 0 || idx >= matches.length) {
-                    console.warn('[Incident] _chooseSubcode: invalid row id', row.id);
-                    return;
-                }
-
-                const chosen = matches[idx];
-                Core.dismissModal();
-                resolve(chosen);
+        const rows = matches.map(m => [m.typeCode, m.typeDesc, m.subCode, m.subDesc]);
+        const table = Core.buildTable(rows, ['Type Code', 'Type', 'Sub Code', 'Subtype'], 'ref-dup-table');
+        const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'lbn'; cancel.textContent = 'Cancel';
+        return new Promise(resolve => {
+            let selected = null;
+            const handle = Core.drawDialog({ title: 'Select Type', body: table, footer: cancel, className: 'modl-wide', scrollable: true,
+                onClose: () => resolve(selected),
             });
-
+            cancel.onclick = () => handle.close('cancel');
+            Array.from(table.tBodies[0].rows).forEach((row, index) => {
+                row.tabIndex = 0;
+                const choose = () => { selected = matches[index]; handle.close('select'); };
+                row.addEventListener('click', choose);
+                row.addEventListener('keydown', event => {
+                    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); choose(); }
+                });
+            });
         });
     }
 
-
     _isValidSubcode(ctx, valueOverride) {
-        const type = document.getElementById(`${ctx}-type`)?.value;
-        const subtype = document.getElementById(`${ctx}-subtype`)?.value;
-        const val = ((valueOverride ?? document.getElementById(`${ctx}-subcode`)?.value) || '').trim();
-        if (!type || !subtype || !val) return false;
-        const codes = this.categories[ctx]?.byType?.[type]?.bySubtype?.[subtype] || [];
-        return codes.includes(val);
+        if (ctx !== 'reference') return false;
+        const type = document.getElementById('ref-type')?.value;
+        const subtype = document.getElementById('ref-sub-type')?.value;
+        const code = String(valueOverride ?? document.getElementById('ref-type-abbr')?.value ?? '').trim().toUpperCase();
+        return !!type && !!subtype && !!code && (this.categories.reference.byCode[code] || [])
+            .some(match => match.typeCode === type && match.subCode === subtype && match.subCode === code);
     }
 
     _populateSelect(selectEl, options, { includeBlank = false } = {}) {
@@ -2329,6 +2302,8 @@ export class Incident {
     // 5) Ancestor "chosen" helpers (notepad update)
     // -----------------------------------------
     _setChosenReference(artifactType, artifactId) {
+        const type = String(artifactType || '').toUpperCase();
+        if (!['CLAIM', 'CLAIMS', 'AUTHORIZATION', 'AUTHORIZATIONS'].includes(type)) return false;
         this._chosen.artifactType = String(artifactType || '').toUpperCase();
         this._chosen.artifactId = String(artifactId || '');
 
@@ -2337,6 +2312,7 @@ export class Incident {
         this._setNotepadValue('reference.artifactId', this._chosen.artifactId);
 
         this.resolveDynamicLabels();
+        return true;
     }
 
     _clearChosenReference() {

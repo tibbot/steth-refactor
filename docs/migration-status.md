@@ -7,3 +7,5 @@ Provider/vendor collections and detail-button visibility are live accepted. Heal
 Backlog, outside this iteration: load an existing incident. Editing is not implied because the current persistence procedure is insert-only.
 
 Separate CoreBackend observations: support nvarchar and uniqueidentifier transport types. No implementation is included in this migration task.
+
+Legacy parity review found vendor binding, incident choice policy, reset/initialization, subtype cancellation/validation, and CSM identity-source gaps. Corrections are implemented, regression-tested, and independently reviewed; awaiting live acceptance before cleanup.

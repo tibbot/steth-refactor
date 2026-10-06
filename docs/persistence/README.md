@@ -1,6 +1,6 @@
 # Incident persistence
 
-The application-owned IncidentPersistence adapter translates current form and notepad fields into the existing flat JSON contract for scp.set_incident. Chosen references serialize as singular Claim or Authorization. User name comes from pEL and numeric user ID from pUID. Start/open dates are generated from the contact start in local calendar time; duration is sampled at submission. Empty closed dates serialize as null.
+The application-owned IncidentPersistence adapter translates current form and notepad fields into the existing flat JSON contract for scp.set_incident. Chosen references serialize as singular Claim or Authorization. User name comes from pEL. The numeric incident-system user ID comes from csm_user_id returned by scp.get_next_csino, matching legacy; authentication pUID is not substituted. Missing csm_user_id blocks persistence. Start/open dates are generated from the contact start in local calendar time; duration is sampled at submission. Empty closed dates serialize as null.
 
 The ParameterSQL request contains one @p_csi_data parameter. Transport remains varchar because the current CoreBackend type switch does not support nvarchar, although the SQL procedure declares nvarchar(max). Adding Unicode parameter support is a separate Core improvement for discussion.
 
@@ -13,3 +13,5 @@ Verification: tests/persistence.browser.cjs runs the real application class and 
 Out of scope: loading/editing existing incidents, changing SQL procedure behavior, CoreBackend Unicode support, and additional domain collections.
 
 Submission validation is application-owned. The previous save hook passed a selector to a validation API whose current contract expects a schema and values; it did not provide a usable save validation path. Persistence now checks the legacy required fields, selected subjects, initialized incident/time, and numeric agent identity explicitly before posting.
+
+Parity fixes: vendor normalization preserves SQL aliases (with vendorid compatibility for older snippets); incident choices are rejected; reset invalidates pending initialization; subtype picker cancellation settles and clears the triad; save validates the final type/subtype/code combination. Regression tests cover each case, including an old response arriving while a new initialization is pending. Independent review approved the fixes. Live acceptance remains with the owner.

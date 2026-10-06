@@ -451,7 +451,7 @@ function createMemberContract() {
             sp: 'scp.get_incident_detail',
             snip: 'inc',
             idParameter: '@p_csino',
-            canChoose: true,
+            canChoose: false,
           },
         },
       },

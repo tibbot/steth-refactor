@@ -9,3 +9,5 @@ Cleanup retires unused collection/detail paths, moves detail coverage to active 
 Backlog, outside this iteration: loading an existing incident. Editing is not implied because the current procedure is insert-only. NPI query helpers are retained; loading APIs remain as backlog placeholders.
 
 Separate CoreBackend observations: nvarchar and uniqueidentifier transport support. No Core changes are part of this cleanup.
+
+Filter header navigation and Year / Current presets are implemented. The new date/navigation suite and six existing suites pass; Core type checking and independent review pass. Live acceptance is pending for these additions.

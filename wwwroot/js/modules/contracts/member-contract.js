@@ -29,6 +29,8 @@ const procedures = Object.freeze({
   diagnosisIndex: 'scp.list_member_artifact_diagnosis_index',
   serviceIndex: 'scp.list_member_artifact_service_index',
   providerIndex: 'scp.list_member_artifact_provider_index',
+  incidentArtifactIndex: 'scp.list_member_incident_related_artifact_index',
+  incidentProviderIndex: 'scp.list_member_incident_provider_index',
 });
 
 /**
@@ -87,8 +89,21 @@ function codeOption(value, description) {
  *
  * @param {Record<string, unknown>} row
  */
+function providerKey(value) {
+  const key = String(value ?? '').trim();
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(key) ? key.toLowerCase() : key;
+}
+
+function professionalOption(row, type) {
+  if (String(row.professionalType ?? '').toUpperCase() !== type) return null;
+  const id = type === 'PROVIDER' ? providerKey(row.professionalId) : String(row.professionalId ?? '').trim();
+  if (!id) return null;
+  return { value: id, label: id, searchText: id,
+    details: { providerId: [id], professionalId: [id], professionalRole: [String(row.professionalRole ?? '')] } };
+}
+
 function providerOption(row) {
-  const providerKeyId = String(row.providerKeyId ?? '').trim();
+  const providerKeyId = providerKey(row.providerKeyId);
   if (!providerKeyId) return null;
 
   const providerName = String(row.providerName ?? '').trim();
@@ -141,7 +156,10 @@ function createMemberContract() {
   return {
     key: 'member',
     label: 'Member Records',
-    createFilter: args => new Core.Fltr(args),
+    createFilter: args => {
+      if (Core.Rmgr?.supportsRelatedFilters !== true) throw new Error('Update Core service before using incident association filters.');
+      return new Core.Fltr(args);
+    },
 
     sets: {
       eligibility: {
@@ -428,7 +446,49 @@ function createMemberContract() {
 
         allowFilter: true,
 
+        secondary: {
+          professionals: {
+            load: memberKeyId => loadRows(procedures.incidentProviderIndex, memberKeyId),
+            sharedKey: procedures.incidentProviderIndex,
+            requiredForFilter: true,
+          },
+          relatedArtifacts: {
+            load: memberKeyId => loadRows(procedures.incidentArtifactIndex, memberKeyId),
+            sharedKey: procedures.incidentArtifactIndex,
+            requiredForFilter: false,
+          },
+        },
+
+        relatedFilters: [{
+          source: 'relatedArtifacts',
+          whenAny: ['diagnosis', 'serviceCode'],
+          parentId: row => String(row.CSINO ?? ''),
+          targets: [
+            { setKey: 'claims', select: row => row.artifactType === 'CLAIM', recordId: row => String(row.artifactId ?? row.artifactID ?? '') },
+            { setKey: 'authorizations', select: row => row.artifactType === 'AUTHORIZATION', recordId: row => String(row.artifactId ?? row.artifactID ?? '') },
+          ],
+          // Provider/vendor qualification belongs to the incident's direct
+          // associations, not to providers on these linked artifacts.
+          projectCriteria: criteria => Object.fromEntries(
+            ['startDate', 'endDate', 'diagnosis', 'serviceCode']
+              .filter(key => criteria[key] !== undefined)
+              .map(key => [key, criteria[key]])
+          ),
+        }],
+
         filters: {
+          provider: {
+            concept: 'provider', label: 'Provider', kind: 'multi', source: 'professionals',
+            parentId: row => String(row.CSINO ?? ''), values: row => professionalOption(row, 'PROVIDER'),
+            searchLabel: 'Search directly associated provider IDs',
+            columns: [{ key: 'providerId', label: 'Provider ID' }, { key: 'professionalRole', label: 'Incident Role' }],
+          },
+          vendor: {
+            concept: 'vendor', label: 'Vendor', kind: 'multi', source: 'professionals',
+            parentId: row => String(row.CSINO ?? ''), values: row => professionalOption(row, 'VENDOR'),
+            searchLabel: 'Search directly associated vendor IDs',
+            columns: [{ key: 'professionalId', label: 'Vendor ID' }, { key: 'professionalRole', label: 'Incident Role' }],
+          },
           dateRange: {
             concept: 'dateRange',
             label: 'Date Range',

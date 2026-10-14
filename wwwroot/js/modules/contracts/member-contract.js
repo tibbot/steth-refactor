@@ -533,7 +533,16 @@ function createMemberContract() {
 
         recordId: row => String(row.conditionKey ?? ''),
 
-        allowFilter: false,
+        allowFilter: true,
+
+        filters: {
+          dateRange: {
+            concept: 'dateRange', label: 'Date Range', kind: 'dateRange',
+            source: 'primary', parentId: row => String(row.conditionKey ?? ''),
+            start: row => row.conditionFromDate, end: row => row.conditionToDate,
+            matchMode: 'overlap', openEndYear: 9999,
+          },
+        },
 
         metadata: {
           tableId: 'member-condition-table',

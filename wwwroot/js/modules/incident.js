@@ -1666,6 +1666,10 @@ export class Incident {
 
         const contract = factory();
 
+        if (typeof Core.Rmgr.prototype.setFilterEnabled !== 'function') {
+            throw new Error('Update Core service to support collection filter toggles.');
+        }
+
         const manager = new Core.Rmgr(contract);
         this._rmgr = manager;
         manager.initialize();
@@ -1695,6 +1699,7 @@ export class Incident {
             tabs: Object.values(contract.sets).map(set => ({
                 key: set.key,
                 label: set.label,
+                filterToggle: set.allowFilter === true,
                 panel: {
                     kind: 'table',
                     tableId: set.metadata.tableId,
@@ -1733,6 +1738,7 @@ export class Incident {
                     catch (error) { await Core.displayAsyncModal(Core.buildSnip('msg'), `Unable to filter: ${error.message}`); }
                 },
                 onClearFilter: ({ tabKey }) => this._rmgr?.clearFilter(tabKey),
+                onFilterToggle: ({ tabKey, enabled }) => this._rmgr?.setFilterEnabled(tabKey, enabled),
                 onViewFilter: async ({ tabKey }) => {
                     try { await this._rmgr?.viewFilter(tabKey); }
                     catch (error) { await Core.displayAsyncModal(Core.buildSnip('msg'), `Unable to view filter: ${error.message}`); }
@@ -1770,7 +1776,12 @@ export class Incident {
                 status: view.visibleCount ? 'ready' : 'empty',
                 filterable,
                 filtered: active,
-                filterText: active ? 'Filter applied to collections.' : '',
+                filterEnabled: view.filterEnabled,
+                filterApplicable: view.filterApplicable,
+                filterText: !active ? '' : !view.filterApplicable
+                    ? 'No applicable filter for this collection.'
+                    : view.filterEnabled ? 'Filter applied to this collection.'
+                    : 'Filter off for this collection. Showing all records.',
             });
             if (!view.visibleCount) this._clct.setPanelStatus(view.key, 'empty');
         }

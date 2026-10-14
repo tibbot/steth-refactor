@@ -26,7 +26,7 @@ const server=http.createServer((req,res)=>{
   const data={
    'scp.list_member_claim':[{CLAIMNO:'C1',serviceFromDate:'2026-02-01',serviceThroughDate:'2026-02-10'},{CLAIMNO:'C2',serviceFromDate:'2026-02-01',serviceThroughDate:'2026-02-10'},{CLAIMNO:'C3',serviceFromDate:'2025-02-01',serviceThroughDate:'2025-02-10'}],
    'scp.list_member_authorization':[{AUTHNO:'A1',requestDate:'2026-02-01',expirationDate:'2026-02-10'}],
-   'scp.list_member_incident':Array.from({length:7},(_,i)=>({CSINO:'I'+(i+1),openDate:i===3?'2025-02-01':'2026-02-01',closeDate:i===3?'2025-02-10':null})),
+   'scp.list_member_incident':Array.from({length:7},(_,i)=>({CSINO:'I'+(i+1),openDate:i===3?'2027-02-01':'2026-02-01',closeDate:i===3?'2027-02-10':i===2?null:'2026-02-10'})),
    'scp.list_member_artifact_diagnosis_index':[{artifactType:'CLAIM',artifactId:'C1',diagnosisCode:'D',diagnosisDescription:'Diagnosis D'},{artifactType:'CLAIM',artifactId:'C2',diagnosisCode:'D',diagnosisDescription:'Diagnosis D'},{artifactType:'CLAIM',artifactId:'C3',diagnosisCode:'D',diagnosisDescription:'Diagnosis D'},{artifactType:'AUTHORIZATION',artifactId:'A1',diagnosisCode:'E',diagnosisDescription:'Diagnosis E'}],
    'scp.list_member_artifact_service_index':[{artifactType:'CLAIM',artifactId:'C1',serviceCode:'S',serviceDescription:'Service S'},{artifactType:'CLAIM',artifactId:'C2',serviceCode:'T',serviceDescription:'Service T'},{artifactType:'CLAIM',artifactId:'C3',serviceCode:'S',serviceDescription:'Service S'},{artifactType:'AUTHORIZATION',artifactId:'A1',serviceCode:'S',serviceDescription:'Service S'}],
    'scp.list_member_artifact_provider_index':[{artifactType:'CLAIM',artifactId:'C1',providerKeyId:'Q',providerName:'Artifact Provider'},{artifactType:'CLAIM',artifactId:'C2',providerKeyId:'P',providerName:'Primary Provider'},{artifactType:'AUTHORIZATION',artifactId:'A1',providerKeyId:'Q',providerName:'Artifact Provider'}],
@@ -70,20 +70,22 @@ const server=http.createServer((req,res)=>{
  assert.equal(await page.evaluate(()=>{const tab=document.querySelector('.clct-tab-group .clct-tab__label'),label=document.querySelector('.clct-tab-filter');return getComputedStyle(tab).fontSize===getComputedStyle(label).fontSize}),true,'production CSS equal label fonts');
  const dates={startDate:'2026-01-01',endDate:'2026-12-31'};
  assert.equal(await page.evaluate(()=>calls.filter(p=>p.spName.endsWith('_index')).length),0,'primary load is index-free');
+ assert.equal(await page.locator('.clct-tab-filter:not(.dnd)').count(),0,'no shared filter hides all labels');
  await apply(dates);await expect('I1,I2,I3,I5,I6,I7','own dates preserve unlinked');
+ assert.equal(await page.locator('.clct-tab-filter:not(.dnd)').count(),5,'active shared filter reveals labels');
  assert.equal(await page.evaluate(()=>calls.filter(p=>p.spName.includes('related_artifact')).length),0,'date-only does not load association');
- await apply({...dates,diagnosis:['D']});await expect('I1,I2,I6','typed diagnosis links and target dates');
- await apply({...dates,serviceCode:['S']});await expect('I1,I5,I6','service links');
+ await apply({...dates,diagnosis:['D']});await expect('I1,I2,I4,I6','diagnosis links retain subsequent incidents and constrain artifact dates');
+ await apply({...dates,serviceCode:['S']});await expect('I1,I4,I5,I6','service links retain subsequent incidents');
  await apply({...dates,diagnosis:['E'],serviceCode:['T']});await expect('','zero qualifying artifacts means zero incidents');
- await apply({...dates,diagnosis:['D'],serviceCode:['S']});await expect('I1','dx and service must qualify the same linked artifact');
- await apply({...dates,diagnosis:['D'],serviceCode:['S'],provider:['P']});await expect('I1','direct provider differs from linked artifact provider');
+ await apply({...dates,diagnosis:['D'],serviceCode:['S']});await expect('I1,I4','dx and service must qualify same artifact independent of incident dates');
+ await apply({...dates,diagnosis:['D'],serviceCode:['S'],provider:['P']});await expect('I1,I4','direct provider AND links ignore incident dates');
  assert.equal(await page.evaluate(()=>app._rmgr.getView('claims').visibleCount),0,'linked projection does not require target provider');
- assert.match(await page.locator('.clct-tab[data-tab-key="incidents"]').innerText(),/1 of 7/,'visible count updated');
+ assert.match(await page.locator('.clct-tab[data-tab-key="incidents"]').innerText(),/2 of 7/,'visible count updated');
  await page.locator('.clct-tab[data-tab-key="claims"]').click();
  const requestsBeforeToggle=await page.evaluate(()=>calls.length);
  const criteriaBeforeToggle=await page.evaluate(()=>JSON.stringify(app._rmgr.getFilterCriteria()));
  await page.locator('input[data-filter-tab-key="claims"]').uncheck();
- await expect('I1','showing all claims preserves incident matches');
+ await expect('I1,I4','showing all claims preserves incident matches');
  assert.equal(await page.evaluate(()=>app._rmgr.getView('claims').visibleCount),3);
  assert.equal(await page.locator('.clct-tab[aria-selected=true]').getAttribute('data-tab-key'),'claims','checkbox leaves active tab unchanged');
  await page.locator('input[data-filter-tab-key="incidents"]').uncheck();
@@ -98,7 +100,7 @@ const server=http.createServer((req,res)=>{
  await apply({...dates,diagnosis:['D']});
  await expect('I1,I2,I3,I4,I5,I6,I7','new criteria preserve bypass');
  await page.locator('input[data-filter-tab-key="incidents"]').focus();await page.keyboard.press('Space');
- await expect('I1,I2,I6','keyboard resumes latest criteria');
+ await expect('I1,I2,I4,I6','keyboard resumes latest criteria');
  assert.equal(await page.evaluate(()=>app._rmgr.getView('claims').visibleCount),3,'other tab remains bypassed');
  await page.locator('input[data-filter-tab-key="claims"]').check();
  assert.equal(await page.evaluate(()=>app._rmgr.getView('claims').visibleCount),2,'claims resume date/dx');
@@ -106,6 +108,14 @@ const server=http.createServer((req,res)=>{
  await apply({diagnosis:['D']});
  assert.equal(await page.locator('input[data-filter-tab-key="conditions"]').isDisabled(),true,'no applicable conditions criterion');
  assert.equal(await page.locator('input[data-filter-tab-key="eligibility"]').isDisabled(),true,'dx does not apply to eligibility');
+ await page.locator('.clct-tab[data-tab-key="incidents"]').click();
+ await apply({...dates,diagnosis:['D'],serviceCode:['S']});
+ assert.match(await page.locator('.clct-filter-text').innerText(),/incident dates are unrestricted/,'effective rule explained');
+ assert.deepEqual(await page.evaluate(()=>{const c=app._rmgr.getFilterCriteria();return {startDate:c.startDate,endDate:c.endDate,diagnosis:c.diagnosis,serviceCode:c.serviceCode}}),{...dates,diagnosis:['D'],serviceCode:['S']},'shared dates preserved');
+ const later={startDate:'2027-01-01',endDate:'2027-12-31'};
+ await apply(later);await expect('I3,I4','date-only uses incident dates including open-ended interactions');
+ assert.match(await page.locator('.clct-filter-text').innerText(),/incident opened\/closed periods/);
+ await apply({...later,diagnosis:['D']});await expect('','linked artifacts must match their own selected dates');
  await apply({...dates,provider:['P']});await expect('I1,I2,I3,I6,I7','both customer/reference direct provider roles');
  await apply({...dates,vendor:['V']});await expect('I1,I5,I6','both direct vendor roles');
  await apply({...dates,serviceCode:['S'],vendor:['V']});await expect('I1,I5,I6','service AND direct vendor');
@@ -114,10 +124,12 @@ const server=http.createServer((req,res)=>{
  assert.equal(await page.evaluate(()=>calls.filter(p=>p.spName.includes('related_artifact')).length),1,'relationship load cached per member');
  assert.equal(await page.evaluate(()=>calls.filter(p=>p.spName.includes('incident_provider_index')).length),1,'direct professional load cached');
  await page.evaluate(()=>app._rmgr.clearFilter('incidents'));await expect('I1,I2,I3,I4,I5,I6,I7','clear');
+ assert.equal(await page.locator('.clct-tab-filter:not(.dnd)').count(),0,'clear hides labels');
  await page.evaluate(async()=>{app._rmgr.setFilterEnabled('incidents',false);await app.showReferenceCollections({domain:'MEMBER',subjectId:'member-B'});window.failIndex=true;});
  assert.equal(await page.locator('.clct-tab-filter input:checked').count(),5,'new member resets all preferences');
+ assert.equal(await page.locator('.clct-tab-filter:not(.dnd)').count(),0,'new member hides labels');
  await apply(dates);const failed=await apply({...dates,diagnosis:['D']});assert(!failed.ok);await expect('I1,I2,I3,I5,I6,I7','failed index preserves date view');
- await page.evaluate(()=>{window.failIndex=false;});await apply({...dates,diagnosis:['D']});await expect('I1,I2,I6','same-member retry');
+ await page.evaluate(()=>{window.failIndex=false;});await apply({...dates,diagnosis:['D']});await expect('I1,I2,I4,I6','same-member retry');
  await page.screenshot({path:path.join(require('os').tmpdir(),controller+'-collection-toggle-desktop.png')});
  await page.setViewportSize({width:390,height:844});await apply({...dates,vendor:['V']});await expect('I1,I5,I6','narrow-screen filtering');
  await page.screenshot({path:path.join(require('os').tmpdir(),controller+'-collection-toggle-mobile.png')});

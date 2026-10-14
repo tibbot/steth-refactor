@@ -152,13 +152,29 @@ function providerFilters(primaryKey) {
  *
  * @returns {object}
  */
+function hasArtifactCriteria(criteria) {
+  return ['diagnosis', 'serviceCode'].some(key => {
+    const value = criteria[key];
+    return Array.isArray(value) ? value.length > 0 : value != null && value !== '';
+  });
+}
+
+/** Incident interactions can occur outside the linked artifact's date range. */
+class IncidentFilter extends Core.Fltr {
+  project(criteria) {
+    if (!hasArtifactCriteria(criteria)) return super.project(criteria);
+    const { startDate, endDate, ...directCriteria } = criteria;
+    return super.project(directCriteria);
+  }
+}
+
 function createMemberContract() {
   return {
     key: 'member',
     label: 'Member Records',
     createFilter: args => {
       if (Core.Rmgr?.supportsRelatedFilters !== true) throw new Error('Update Core service before using incident association filters.');
-      return new Core.Fltr(args);
+      return args.setKey === 'incidents' ? new IncidentFilter(args) : new Core.Fltr(args);
     },
 
     sets: {
@@ -504,6 +520,9 @@ function createMemberContract() {
 
         metadata: {
           tableId: 'member-incident-table',
+          filterDescription: criteria => hasArtifactCriteria(criteria)
+            ? 'Dates apply to linked claims and authorizations; incident dates are unrestricted.'
+            : 'Dates apply to incident opened/closed periods.',
           columns: [
             { key: 'CSINO', label: 'Incident #', sortable: true, sortType: 'text' },
             { key: 'openDate', label: 'Opened', sortable: true, sortType: 'date', displayFormat: 'date' },

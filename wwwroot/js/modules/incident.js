@@ -1783,6 +1783,11 @@ export class Incident {
                     : view.filterEnabled ? 'Filter applied to this collection.'
                     : 'Filter off for this collection. Showing all records.',
             });
+            if (active && view.filterApplicable && view.filterEnabled && set.metadata.filterDescription) {
+                this._clct.updatePanel(view.key, {
+                    filterText: `Filter applied to this collection. ${set.metadata.filterDescription(this._rmgr.getFilterCriteria())}`,
+                });
+            }
             if (!view.visibleCount) this._clct.setPanelStatus(view.key, 'empty');
         }
     }
